@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de Chamadas - Projeto Lego{% endblock %}
+
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+  <div>
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">
+      📊 Histórico de Chamadas Lego
+    </h2>
+    <p style="color: var(--text-muted); font-weight: 600; margin-top: 4px;">
+      Registro completo de frequência e oficinas realizadas
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="{{ url_for('chamada') }}" class="btn-lego btn-red">
+      <span>📋</span> Nova Chamada
+    </a>
+    <a href="{{ url_for('exportar_csv', turma_id=turma_filtro) }}" class="btn-lego btn-blue">
+      <span>📥</span> Exportar Relatório (CSV)
+    </a>
+  </div>
+</div>
+
+<!-- Filtros de Busca -->
+<div class="lego-card" style="margin-bottom: 20px;">
+  <div class="lego-card-body" style="padding: 16px;">
+    <form method="GET" action="{{ url_for('historico') }}" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+      <div>
+        <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Filtrar por Turma:</label>
+        <select name="turma_id" class="input-lego" style="width: 220px;">
+          <option value="">Todas as Turmas</option>
+          {% for t in turmas %}
+            <option value="{{ t.id }}" {% if turma_filtro == t.id %}selected{% endif %}>{{ t.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Filtrar por Data:</label>
+        <input type="date" name="data" class="input-lego" value="{{ data_filtro }}">
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button type="submit" class="btn-lego btn-blue">
+          <span>🔍</span> Filtrar
+        </button>
+        <a href="{{ url_for('historico') }}" class="btn-lego btn-gray">
+          Limpar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabela de Histórico -->
+<div class="lego-card">
+  <div class="lego-card-body" style="padding: 0; overflow-x: auto;">
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Turma</th>
+          <th>Tópico / Oficina</th>
+          <th>Presença Geral</th>
+          <th>Detalhamento</th>
+          <th style="text-align: right;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if sessoes|length == 0 %}
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+              Nenhum registro de chamada encontrado.
+            </td>
+          </tr>
+        {% endif %}
+
+        {% for s in sessoes %}
+          {% set info = s.to_dict() %}
+          <tr>
+            <td>
+              <div style="font-weight: 800; font-size: 1rem; color: var(--text-main);">
+                📅 {{ info['data_formatada'] }}
+              </div>
+            </td>
+            <td>
+              <span class="turma-badge" style="background: {{ info['turma_cor'] }}20; color: {{ info['turma_cor'] }}; border: 1px solid {{ info['turma_cor'] }}40;">
+                {{ info['turma_codigo'] }}
+              </span>
+              <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-top: 2px;">
+                {{ info['turma_nome'] }}
+              </div>
+            </td>
+            <td>
+              <div style="font-weight: 700; font-size: 0.95rem;">
+                ⚙️ {{ info['topico'] }}
+              </div>
+              {% if info['observacoes'] %}
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
+                  "{{ info['observacoes'] }}"
+                </div>
+              {% endif %}
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="xp-progress-bar" style="width: 80px;">
+                  <div class="xp-progress-fill" style="width: {{ info['porcentagem'] }}%; background: {% if info['porcentagem'] >= 75 %}var(--lego-green){% else %}var(--lego-red){% endif %};"></div>
+                </div>
+                <span style="font-weight: 800; color: {% if info['porcentagem'] >= 75 %}var(--lego-green){% else %}var(--lego-red){% endif %};">
+                  {{ info['porcentagem'] }}%
+                </span>
+              </div>
+            </td>
+            <td>
+              <div style="font-size: 0.85rem; font-weight: 600;">
+                <span style="color: var(--lego-green);">{{ info['presentes'] }} Pres.</span> &bull; 
+                <span style="color: var(--lego-red);">{{ info['faltas'] }} Faltas</span> &bull; 
+                <span style="color: var(--lego-yellow-dark);">{{ info['justificadas'] }} Just.</span>
+              </div>
+            </td>
+            <td style="text-align: right;">
+              <div style="display: flex; justify-content: flex-end; gap: 6px;">
+                <button type="button" class="btn-lego btn-blue btn-sm" onclick="verDetalhesChamada({{ s.id }})">
+                  👁️ Ver
+                </button>
+                <a href="{{ url_for('chamada', turma_id=s.turma_id, data=info['data']) }}" class="btn-lego btn-yellow btn-sm">
+                  ✏️ Editar
+                </a>
+                <button type="button" class="btn-lego btn-gray btn-sm" onclick="excluirChamadaHistorico({{ s.id }})">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- MODAL: DETALHES DA CHAMADA -->
+<div id="modalDetalhesChamada" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 650px;">
+    <div class="modal-header" style="background: var(--lego-blue);">
+      <h3 id="modalDetalhesTitulo">📋 Detalhes da Chamada</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalDetalhesChamada')">&times;</button>
+    </div>
+    <div class="modal-body" id="modalDetalhesConteudo">
+      <!-- Preenchido via JS -->
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalDetalhesChamada')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function verDetalhesChamada(sessaoId) {
+    const modal = document.getElementById('modalDetalhesChamada');
+    const conteudo = document.getElementById('modalDetalhesConteudo');
+    const titulo = document.getElementById('modalDetalhesTitulo');
+
+    conteudo.innerHTML = '<div style="text-align: center; padding: 20px;">Carregando detalhes...</div>';
+    openModal('modalDetalhesChamada');
+
+    try {
+      const res = await fetch(`/api/historico/${sessaoId}`);
+      const data = await res.json();
+      const s = data.sessao;
+
+      titulo.innerHTML = `📋 Chamada: ${s.turma_nome} (${s.data_formatada})`;
+
+      let html = `
+        <div style="background: var(--bg-color); padding: 14px; border-radius: 8px; margin-bottom: 16px;">
+          <div><strong>Oficina / Tópico:</strong> ${s.topico}</div>
+          ${s.observacoes ? `<div style="margin-top: 4px;"><strong>Observações:</strong> ${s.observacoes}</div>` : ''}
+          <div style="margin-top: 6px; font-size: 0.85rem; color: var(--text-muted);">
+            Presença: ${s.presentes} presentes / ${s.faltas} faltas / ${s.justificadas} justificadas (${s.porcentagem}%)
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 10px;">Lista de Alunos:</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px; max-height: 350px; overflow-y: auto;">
+      `;
+
+      data.registros.forEach(r => {
+        let badgeStatus = '';
+        if (r.status === 'presente') badgeStatus = '<span style="background: var(--lego-green-light); color: var(--lego-green-dark); padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">✅ Presente (+10 XP)</span>';
+        else if (r.status === 'falta') badgeStatus = '<span style="background: #FEE2E2; color: var(--lego-red-dark); padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">❌ Falta</span>';
+        else badgeStatus = '<span style="background: var(--lego-yellow-light); color: var(--lego-yellow-dark); padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">⚠️ Justificada (+2 XP)</span>';
+
+        html += `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: white; border: 1px solid var(--border-color); border-radius: 6px;">
+            <div>
+              <div style="font-weight: 700;">${r.aluno_nome}</div>
+              ${r.justificativa ? `<div style="font-size: 0.75rem; color: var(--lego-red);">Motivo: ${r.justificativa}</div>` : ''}
+              ${r.pontos_bonus > 0 ? `<div style="font-size: 0.75rem; color: #0284C7;">🎁 Bônus: +${r.pontos_bonus} XP (${r.motivo_bonus})</div>` : ''}
+            </div>
+            <div>${badgeStatus}</div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      conteudo.innerHTML = html;
+
+    } catch (err) {
+      conteudo.innerHTML = '<div style="color: var(--lego-red); text-align: center;">Erro ao carregar detalhes.</div>';
+    }
+  }
+</script>
+{% endblock %}

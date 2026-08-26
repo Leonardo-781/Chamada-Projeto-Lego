@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Ranking & Gamificação - Projeto Lego{% endblock %}
+
+{% block content %}
+
+<!-- Cabeçalho de Gamificação -->
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+  <div>
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">
+      🏆 Placar de Líderes & Gamificação Lego
+    </h2>
+    <p style="color: var(--text-muted); font-weight: 600; margin-top: 4px;">
+      Tijolos de XP acumulados através de presença, pontualidade e desafios de robótica
+    </p>
+  </div>
+
+  <!-- Filtro por Turma -->
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <a href="{{ url_for('gamificacao') }}" class="btn-lego {% if not turma_filtro %}btn-yellow{% else %}btn-gray{% endif %} btn-sm">
+      Geral (Todas)
+    </a>
+    {% for t in turmas %}
+      <a href="{{ url_for('gamificacao', turma_id=t.id) }}" class="btn-lego {% if turma_filtro == t.id %}btn-yellow{% else %}btn-gray{% endif %} btn-sm">
+        {{ t.nome }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Pódio dos 3 Melhores Construtores -->
+{% if ranking|length >= 3 %}
+<div style="display: flex; justify-content: center; align-items: flex-end; gap: 20px; margin: 30px 0 40px; flex-wrap: wrap;">
+  
+  <!-- 2º Lugar (Prata) -->
+  {% set a2 = ranking[1] %}
+  <div style="text-align: center; width: 160px;">
+    <div style="font-size: 1.8rem; margin-bottom: 4px;">🥈</div>
+    <div class="avatar-lego {{ a2.avatar_tipo }}" style="width: 64px; height: 64px; font-size: 2rem; margin: 0 auto 8px; border: 3px solid #CBD5E1;">
+      {% if a2.avatar_tipo == 'lego-ninja' %}🥷{% elif a2.avatar_tipo == 'lego-astronaut' %}👨‍🚀{% elif a2.avatar_tipo == 'lego-purple' %}🧙{% elif a2.avatar_tipo == 'lego-green' %}🦖{% elif a2.avatar_tipo == 'lego-orange' %}🏎️{% elif a2.avatar_tipo == 'lego-blue' %}🤖{% elif a2.avatar_tipo == 'lego-yellow' %}😀{% else %}🦸{% endif %}
+    </div>
+    <div style="font-weight: 800; font-size: 0.95rem;">{{ a2.nome }}</div>
+    <div style="font-size: 0.8rem; color: var(--text-muted);">{{ a2.pontos_xp }} XP</div>
+    <div style="height: 90px; background: #E2E8F0; border-top: 5px solid #94A3B8; border-radius: 8px 8px 0 0; margin-top: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: #475569;">
+      2º
+    </div>
+  </div>
+
+  <!-- 1º Lugar (Ouro) -->
+  {% set a1 = ranking[0] %}
+  <div style="text-align: center; width: 180px;">
+    <div style="font-size: 2.2rem; margin-bottom: 4px; animation: bounce 1s infinite alternate;">👑</div>
+    <div class="avatar-lego {{ a1.avatar_tipo }}" style="width: 80px; height: 80px; font-size: 2.5rem; margin: 0 auto 8px; border: 4px solid var(--lego-yellow); box-shadow: 0 0 15px rgba(255,215,0,0.5);">
+      {% if a1.avatar_tipo == 'lego-ninja' %}🥷{% elif a1.avatar_tipo == 'lego-astronaut' %}👨‍🚀{% elif a1.avatar_tipo == 'lego-purple' %}🧙{% elif a1.avatar_tipo == 'lego-green' %}🦖{% elif a1.avatar_tipo == 'lego-orange' %}🏎️{% elif a1.avatar_tipo == 'lego-blue' %}🤖{% elif a1.avatar_tipo == 'lego-yellow' %}😀{% else %}🦸{% endif %}
+    </div>
+    <div style="font-weight: 800; font-size: 1.1rem; color: var(--lego-red);">{{ a1.nome }}</div>
+    <div style="font-size: 0.9rem; font-weight: 700; color: var(--lego-yellow-dark);">⭐ {{ a1.pontos_xp }} XP ⭐</div>
+    <div style="height: 120px; background: var(--lego-yellow); border-top: 5px solid var(--lego-yellow-dark); border-radius: 8px 8px 0 0; margin-top: 10px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; color: #111;">
+      1º
+    </div>
+  </div>
+
+  <!-- 3º Lugar (Bronze) -->
+  {% set a3 = ranking[2] %}
+  <div style="text-align: center; width: 160px;">
+    <div style="font-size: 1.8rem; margin-bottom: 4px;">🥉</div>
+    <div class="avatar-lego {{ a3.avatar_tipo }}" style="width: 64px; height: 64px; font-size: 2rem; margin: 0 auto 8px; border: 3px solid #EDC291;">
+      {% if a3.avatar_tipo == 'lego-ninja' %}🥷{% elif a3.avatar_tipo == 'lego-astronaut' %}👨‍🚀{% elif a3.avatar_tipo == 'lego-purple' %}🧙{% elif a3.avatar_tipo == 'lego-green' %}🦖{% elif a3.avatar_tipo == 'lego-orange' %}🏎️{% elif a3.avatar_tipo == 'lego-blue' %}🤖{% elif a3.avatar_tipo == 'lego-yellow' %}😀{% else %}🦸{% endif %}
+    </div>
+    <div style="font-weight: 800; font-size: 0.95rem;">{{ a3.nome }}</div>
+    <div style="font-size: 0.8rem; color: var(--text-muted);">{{ a3.pontos_xp }} XP</div>
+    <div style="height: 70px; background: #EDC291; border-top: 5px solid #CD9B66; border-radius: 8px 8px 0 0; margin-top: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 800; color: #5A3508;">
+      3º
+    </div>
+  </div>
+
+</div>
+{% endif %}
+
+<!-- Tabela de Classificação Completa -->
+<div class="lego-card">
+  <div class="lego-card-header" style="background: white;">
+    <span style="font-weight: 800; font-size: 1.1rem;">📊 Classificação Completa dos Alunos</span>
+    <span style="font-size: 0.85rem; color: var(--text-muted);">{{ ranking|length }} participantes</span>
+  </div>
+  <div class="lego-card-body" style="padding: 0; overflow-x: auto;">
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th style="width: 60px; text-align: center;">Pos.</th>
+          <th>Aluno Construtor</th>
+          <th>Turma & Equipe</th>
+          <th>Progresso do Nível</th>
+          <th>Medalhas</th>
+          <th style="text-align: right;">Total de XP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in ranking %}
+          {% set lvl = a.info_nivel %}
+          <tr>
+            <td style="text-align: center;">
+              <span class="rank-badge {{ 'rank-1' if loop.index == 1 else ('rank-2' if loop.index == 2 else ('rank-3' if loop.index == 3 else 'rank-other')) }}">
+                {{ loop.index }}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="avatar-lego {{ a.avatar_tipo }}" style="width: 40px; height: 40px; font-size: 1.3rem;">
+                  {% if a.avatar_tipo == 'lego-ninja' %}🥷{% elif a.avatar_tipo == 'lego-astronaut' %}👨‍🚀{% elif a.avatar_tipo == 'lego-purple' %}🧙{% elif a.avatar_tipo == 'lego-green' %}🦖{% elif a.avatar_tipo == 'lego-orange' %}🏎️{% elif a.avatar_tipo == 'lego-blue' %}🤖{% elif a.avatar_tipo == 'lego-yellow' %}😀{% else %}🦸{% endif %}
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.95rem;">{{ a.nome }}</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">{{ lvl['badge'] }} {{ lvl['titulo'] }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">{{ a.turma.codigo }}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">{{ a.equipe }}</div>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="xp-progress-bar">
+                  <div class="xp-progress-fill" style="width: {{ lvl['progresso'] }}%;"></div>
+                </div>
+                <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">{{ lvl['progresso'] }}%</span>
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; gap: 4px; font-size: 1.2rem;">
+                {% for c in a.conquistas %}
+                  <span title="{{ c.medalha.nome }}">{{ c.medalha.icone }}</span>
+                {% endfor %}
+              </div>
+            </td>
+            <td style="text-align: right;">
+              <span style="font-size: 1.05rem; font-weight: 800; color: var(--lego-yellow-dark); background: var(--lego-yellow-light); padding: 4px 10px; border-radius: 8px;">
+                🧱 {{ a.pontos_xp }} XP
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Níveis de Construtor & Galeria de Medalhas -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-top: 30px;">
+  
+  <!-- Níveis de Construtor Lego -->
+  <div class="lego-card">
+    <div class="lego-card-header" style="background: var(--lego-blue-light);">
+      <span style="font-weight: 800; font-size: 1.1rem; color: var(--lego-blue-dark);">🚀 Níveis de Construtor Lego</span>
+    </div>
+    <div class="lego-card-body">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 1.8rem; background: var(--bg-color); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">🧱</div>
+          <div>
+            <div style="font-weight: 800;">Nível 1 - Aprendiz de Blocos</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">0 a 49 XP &bull; Início da jornada Lego</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 1.8rem; background: var(--bg-color); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">⚙️</div>
+          <div>
+            <div style="font-weight: 800;">Nível 2 - Construtor Ágil</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">50 a 149 XP &bull; Mecanismos e estruturas</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 1.8rem; background: var(--bg-color); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">🤖</div>
+          <div>
+            <div style="font-weight: 800;">Nível 3 - Engenheiro Robótico</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">150 a 299 XP &bull; Automação e motores</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 1.8rem; background: var(--bg-color); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">🚀</div>
+          <div>
+            <div style="font-weight: 800;">Nível 4 - Mestre da Criação</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">300 a 499 XP &bull; Projetos avançados</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 1.8rem; background: var(--lego-yellow-light); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">👑</div>
+          <div>
+            <div style="font-weight: 800; color: #B45309;">Nível 5 - Mestre Construtor Lendário</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">500+ XP &bull; O topo supremo da robótica!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Galeria de Medalhas Disponíveis -->
+  <div class="lego-card">
+    <div class="lego-card-header" style="background: var(--lego-yellow-light);">
+      <span style="font-weight: 800; font-size: 1.1rem; color: #78350F;">🎖️ Conquistas & Medalhas</span>
+    </div>
+    <div class="lego-card-body">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        {% for m in medalhas %}
+          <div style="background: var(--bg-color); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 1.8rem;">{{ m.icone }}</div>
+            <div>
+              <div style="font-weight: 800; font-size: 0.85rem;">{{ m.nome }}</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">+{{ m.xp_bonus }} XP</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

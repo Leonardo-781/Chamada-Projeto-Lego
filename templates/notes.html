@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block title %}Diário & Anotações - Projeto Lego{% endblock %}
+
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+  <div>
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">
+      📝 Diário & Anotações das Aulas e Turmas
+    </h2>
+    <p style="color: var(--text-muted); font-weight: 600; margin-top: 4px;">
+      Espaço pedagógico para registrar observações das oficinas Lego, materiais, metas e recados das 3 turmas
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button type="button" class="btn-lego btn-green" onclick="openModal('modalNovaAnotacao')">
+      <span>➕</span> Nova Anotação
+    </button>
+  </div>
+</div>
+
+<!-- ==========================================
+     SEÇÃO 1: MURAL DE ANOTAÇÕES DAS 3 TURMAS
+     ========================================== -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+  <h3 style="font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+    <span>📌</span> Mural Fixo de Notas das 3 Turmas
+  </h3>
+  <span style="font-size: 0.85rem; color: var(--text-muted);">
+    Recados permanentes, kits em uso e objetivos de cada turma
+  </span>
+</div>
+
+<div class="turmas-grid" style="margin-bottom: 36px;">
+  {% for t in turmas %}
+    <div class="turma-card turma-{{ 'a' if loop.index == 1 else ('b' if loop.index == 2 else 'c') }}" style="min-height: 280px;">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="turma-badge" style="background: {{ t.cor_tema }}20; color: {{ t.cor_tema }}; border: 1px solid {{ t.cor_tema }}40;">
+            {{ t.codigo }}
+          </span>
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">
+            👥 {{ t.alunos|length }} Alunos
+          </span>
+        </div>
+
+        <h4 class="turma-title" style="font-size: 1.15rem; margin-bottom: 10px;">{{ t.nome }}</h4>
+
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">
+            Anotações / Kits / Metas da Turma:
+          </label>
+          <textarea id="anotacao-turma-{{ t.id }}" class="input-lego" rows="5" 
+                    placeholder="Escreva aqui observações sobre kits, comportamento, projetos em andamento..." 
+                    style="font-size: 0.85rem; line-height: 1.4; resize: vertical;">{{ t.anotacoes }}</textarea>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn-lego btn-blue btn-sm" onclick="salvarAnotacaoTurma({{ t.id }})">
+          💾 Salvar Anotações da Turma
+        </button>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+
+<!-- ==========================================
+     SEÇÃO 2: DIÁRIO DE BORDO DAS AULAS
+     ========================================== -->
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+  <h3 style="font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+    <span>📖</span> Diário de Bordo & Registros de Aulas
+  </h3>
+
+  <!-- Filtros -->
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <a href="{{ url_for('anotacoes_page') }}" class="btn-lego {% if not turma_filtro %}btn-yellow{% else %}btn-gray{% endif %} btn-sm">
+      Todas as Turmas
+    </a>
+    {% for t in turmas %}
+      <a href="{{ url_for('anotacoes_page', turma_id=t.id) }}" class="btn-lego {% if turma_filtro == t.id %}btn-yellow{% else %}btn-gray{% endif %} btn-sm">
+        {{ t.nome }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
+  
+  <!-- Coluna 1: Anotações Avulsas e Diário de Bordo -->
+  <div class="lego-card">
+    <div class="lego-card-header" style="background: var(--lego-yellow-light); border-bottom: 2px solid var(--lego-yellow);">
+      <span style="font-weight: 800; font-size: 1.05rem; color: #78350F;">💡 Registros & Desafios Lego</span>
+      <span style="font-size: 0.8rem; font-weight: 700; color: #78350F;">{{ diarios|length }} notas</span>
+    </div>
+    <div class="lego-card-body" style="padding: 16px;">
+      
+      {% if diarios|length == 0 %}
+        <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+          <div style="font-size: 2rem;">📝</div>
+          <p style="margin-top: 8px; font-weight: 600;">Nenhuma anotação avulsa cadastrada.</p>
+        </div>
+      {% endif %}
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        {% for d in diarios %}
+          <div style="background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 14px; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px;">
+              <div>
+                <span class="turma-badge" style="background: {{ d.turma.cor_tema }}20; color: {{ d.turma.cor_tema }}; font-size: 0.7rem;">
+                  {{ d.turma.codigo }}
+                </span>
+                <span style="background: white; border: 1px solid #CBD5E1; color: var(--text-muted); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; margin-left: 4px;">
+                  🏷️ {{ d.categoria }}
+                </span>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+                  📅 {{ d.data.strftime('%d/%m/%Y') }}
+                </span>
+                <button type="button" onclick="excluirDiario({{ d.id }})" style="background: none; border: none; cursor: pointer; color: var(--lego-red); font-size: 0.9rem;" title="Excluir">
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <h4 style="font-weight: 800; font-size: 1rem; color: var(--text-main); margin-bottom: 6px;">
+              {{ d.titulo }}
+            </h4>
+
+            <p style="font-size: 0.88rem; color: #334155; line-height: 1.45; white-space: pre-line;">
+              {{ d.conteudo }}
+            </p>
+          </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Coluna 2: Anotações e Planejamento Registrados durante as Chamadas -->
+  <div class="lego-card">
+    <div class="lego-card-header" style="background: var(--lego-blue-light); border-bottom: 2px solid var(--lego-blue);">
+      <span style="font-weight: 800; font-size: 1.05rem; color: var(--lego-blue-dark);">📋 Observações das Chamadas & Próximas Aulas</span>
+      <span style="font-size: 0.8rem; font-weight: 700; color: var(--lego-blue-dark);">{{ sessoes_com_notas|length }} aulas</span>
+    </div>
+    <div class="lego-card-body" style="padding: 16px;">
+      
+      {% if sessoes_com_notas|length == 0 %}
+        <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+          <div style="font-size: 2rem;">🧱</div>
+          <p style="margin-top: 8px; font-weight: 600;">Nenhuma anotação registrada nas chamadas.</p>
+        </div>
+      {% endif %}
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        {% for s in sessoes_com_notas %}
+          <div style="background: white; border: 1.5px solid var(--border-color); border-left: 5px solid {{ s.turma.cor_tema }}; border-radius: 8px; padding: 14px; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">
+                📅 {{ s.data.strftime('%d/%m/%Y') }} - {{ s.turma.nome }}
+              </span>
+              <a href="{{ url_for('chamada', turma_id=s.turma_id, data=s.data.strftime('%Y-%m-%d')) }}" class="btn-lego btn-yellow btn-sm" style="padding: 2px 8px; font-size: 0.75rem;">
+                ✏️ Editar
+              </a>
+            </div>
+
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--lego-blue-dark); margin-bottom: 6px;">
+              ⚙️ Desafio: {{ s.topico }}
+            </div>
+
+            {% if s.observacoes %}
+              <div style="font-size: 0.85rem; color: #475569; margin-bottom: 8px; line-height: 1.4;">
+                <strong>Observações da Turma:</strong> {{ s.observacoes }}
+              </div>
+            {% endif %}
+
+            {% if s.proxima_aula %}
+              <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 6px; padding: 8px; font-size: 0.82rem; color: #166534;">
+                <strong>🚀 Planejamento Próxima Aula:</strong> {{ s.proxima_aula }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+<!-- MODAL: NOVA ANOTAÇÃO / DIÁRIO -->
+<div id="modalNovaAnotacao" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header" style="background: var(--lego-green);">
+      <h3>📝 Nova Anotação Pedagógica</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalNovaAnotacao')">&times;</button>
+    </div>
+    <form onsubmit="salvarNovaAnotacao(event)">
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Turma Lego:</label>
+            <select name="turma_id" class="input-lego" required>
+              {% for t in turmas %}
+                <option value="{{ t.id }}">{{ t.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Data:</label>
+            <input type="date" name="data" class="input-lego" value="{{ hoje }}" required>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Categoria:</label>
+            <select name="categoria" class="input-lego">
+              <option value="Anotação Pedagógica">📝 Anotação Pedagógica</option>
+              <option value="Desafio Lego">🤖 Desafio / Projeto Lego</option>
+              <option value="Recado / Material">📦 Recado / Peças e Materiais</option>
+              <option value="Comportamento / Equipe">🤝 Comportamento & Equipe</option>
+              <option value="Avaliação">⭐ Avaliação do Dia</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Título da Nota:</label>
+            <input type="text" name="titulo" class="input-lego" placeholder="Ex: Desempenho da Equipe Beta no sensor de cor" required>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Conteúdo / Detalhes:</label>
+            <textarea name="conteudo" class="input-lego" rows="5" placeholder="Escreva aqui tudo o que aconteceu de relevante na aula..." required></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalNovaAnotacao')">Cancelar</button>
+        <button type="submit" class="btn-lego btn-green">Salvar Registro</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function salvarAnotacaoTurma(turmaId) {
+    const textarea = document.getElementById(`anotacao-turma-${turmaId}`);
+    if (!textarea) return;
+
+    const texto = textarea.value;
+    try {
+      const res = await fetch(`/api/turma/${turmaId}/anotacoes`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anotacoes: texto })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+      } else {
+        showToast(data.error || 'Erro ao salvar anotações.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro de conexão ao salvar anotações.', 'error');
+    }
+  }
+
+  async function salvarNovaAnotacao(e) {
+    e.preventDefault();
+    const form = e.target;
+    const turma_id = form.turma_id.value;
+    const data = form.data.value;
+    const categoria = form.categoria.value;
+    const titulo = form.titulo.value;
+    const conteudo = form.conteudo.value;
+
+    try {
+      const res = await fetch('/api/diario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ turma_id, data, categoria, titulo, conteudo })
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        showToast(resData.message, 'success');
+        closeModal('modalNovaAnotacao');
+        setTimeout(() => location.reload(), 600);
+      } else {
+        showToast(resData.error || 'Erro ao salvar registro.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro ao comunicar com o servidor.', 'error');
+    }
+  }
+
+  async function excluirDiario(diarioId) {
+    if (!confirm('Deseja realmente excluir esta anotação do diário?')) return;
+
+    try {
+      const res = await fetch(`/api/diario/${diarioId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        setTimeout(() => location.reload(), 600);
+      }
+    } catch (err) {
+      showToast('Erro ao excluir anotação.', 'error');
+    }
+  }
+</script>
+{% endblock %}

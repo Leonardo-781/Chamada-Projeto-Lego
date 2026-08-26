@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}Alunos & Turmas - Projeto Lego{% endblock %}
+
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+  <div>
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">
+      👥 Gerenciamento de Alunos Lego
+    </h2>
+    <p style="color: var(--text-muted); font-weight: 600; margin-top: 4px;">
+      Total de <strong>{{ alunos|length }}</strong> alunos cadastrados no projeto
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button type="button" class="btn-lego btn-green" onclick="openModal('modalNovoAluno')">
+      <span>➕</span> Novo Aluno
+    </button>
+    <a href="{{ url_for('exportar_csv', turma_id=turma_filtro) }}" class="btn-lego btn-blue">
+      <span>📥</span> Exportar Excel (CSV)
+    </a>
+  </div>
+</div>
+
+<!-- Filtro por Turma -->
+<div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+  <a href="{{ url_for('alunos_page') }}" class="btn-lego {% if not turma_filtro %}btn-yellow{% else %}btn-gray{% endif %} btn-sm">
+    Todas as Turmas ({{ alunos|length }})
+  </a>
+  {% for t in turmas %}
+    <a href="{{ url_for('alunos_page', turma_id=t.id) }}" class="btn-lego {% if turma_filtro == t.id %}btn-yellow{% else %}btn-gray{% endif %} btn-sm">
+      {{ t.nome }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- Tabela de Alunos -->
+<div class="lego-card">
+  <div class="lego-card-body" style="padding: 0; overflow-x: auto;">
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Avatar & Nome</th>
+          <th>Turma</th>
+          <th>Equipe</th>
+          <th>Frequência (%)</th>
+          <th>XP / Nível</th>
+          <th>Medalhas</th>
+          <th style="text-align: right;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if alunos|length == 0 %}
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
+              Nenhum aluno encontrado para o filtro selecionado.
+            </td>
+          </tr>
+        {% endif %}
+
+        {% for a in alunos %}
+          {% set stats = a.estatisticas %}
+          {% set lvl = a.info_nivel %}
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="avatar-lego {{ a.avatar_tipo }}" style="width: 42px; height: 42px; font-size: 1.4rem;">
+                  {% if a.avatar_tipo == 'lego-ninja' %}🥷
+                  {% elif a.avatar_tipo == 'lego-astronaut' %}👨‍🚀
+                  {% elif a.avatar_tipo == 'lego-purple' %}🧙
+                  {% elif a.avatar_tipo == 'lego-green' %}🦖
+                  {% elif a.avatar_tipo == 'lego-orange' %}🏎️
+                  {% elif a.avatar_tipo == 'lego-blue' %}🤖
+                  {% elif a.avatar_tipo == 'lego-yellow' %}😀
+                  {% else %}🦸{% endif %}
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 1rem;">{{ a.nome }}</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">ID: #{{ a.id }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="turma-badge" style="background: {{ a.turma.cor_tema }}20; color: {{ a.turma.cor_tema }};">
+                {{ a.turma.codigo }}
+              </span>
+            </td>
+            <td>
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">
+                👥 {{ a.equipe }}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <span style="font-weight: 800; color: {% if stats['porcentagem'] >= 75 %}var(--lego-green){% else %}var(--lego-red){% endif %};">
+                  {{ stats['porcentagem'] }}%
+                </span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">
+                  {{ stats['presentes'] }}P / {{ stats['faltas'] }}F ({{ stats['total'] }} aulas)
+                </span>
+              </div>
+            </td>
+            <td>
+              <div>
+                <div style="font-weight: 800; color: var(--lego-yellow-dark);">
+                  🧱 {{ a.pontos_xp }} XP
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">
+                  {{ lvl['badge'] }} {{ lvl['titulo'] }}
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap; max-width: 140px;">
+                {% for c in a.conquistas %}
+                  <span title="{{ c.medalha.nome }} ({{ c.medalha.descricao }})" style="cursor: pointer; font-size: 1.2rem;">
+                    {{ c.medalha.icone }}
+                  </span>
+                {% endfor %}
+                {% if a.conquistas|length == 0 %}
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Nenhuma</span>
+                {% endif %}
+              </div>
+            </td>
+            <td style="text-align: right;">
+              <div style="display: flex; justify-content: flex-end; gap: 6px;">
+                <button type="button" class="btn-lego btn-yellow btn-sm" title="Conceder Medalha Lego" 
+                        onclick="abrirModalMedalha({{ a.id }}, '{{ a.nome }}')">
+                  🎖️
+                </button>
+                <button type="button" class="btn-lego btn-blue btn-sm" title="Ajustar Pontos XP"
+                        onclick="abrirModalAjustarXp({{ a.id }}, '{{ a.nome }}', {{ a.pontos_xp }})">
+                  ⭐
+                </button>
+                <button type="button" class="btn-lego btn-gray btn-sm" title="Excluir Aluno"
+                        onclick="excluirAluno({{ a.id }}, '{{ a.nome }}')">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- MODAL: NOVO ALUNO -->
+<div id="modalNovoAluno" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>🧱 Cadastrar Novo Aluno Lego</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalNovoAluno')">&times;</button>
+    </div>
+    <form onsubmit="criarNovoAluno(event)">
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Nome Completo:</label>
+            <input type="text" name="nome" class="input-lego" placeholder="Ex: Pedro Henrique" required>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Turma Lego:</label>
+            <select name="turma_id" class="input-lego" required>
+              {% for t in turmas %}
+                <option value="{{ t.id }}">{{ t.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Equipe de Montagem:</label>
+            <input type="text" name="equipe" class="input-lego" placeholder="Ex: RoboTech / Construtores Alfa" value="Equipe Alfa">
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Avatar Minifigura Lego:</label>
+            <select name="avatar_tipo" class="input-lego">
+              <option value="lego-red">🦸 Minifig Vermelho</option>
+              <option value="lego-blue">🤖 Minifig Robô Azul</option>
+              <option value="lego-yellow">😀 Minifig Amarelo Clássico</option>
+              <option value="lego-green">🦖 Minifig Verde Construtor</option>
+              <option value="lego-purple">🧙 Minifig Mago Roxo</option>
+              <option value="lego-orange">🏎️ Minifig Piloto Laranja</option>
+              <option value="lego-ninja">🥷 Minifig Ninja</option>
+              <option value="lego-astronaut">👨‍🚀 Minifig Astronauta</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Pontos Iniciais (XP):</label>
+            <input type="number" name="pontos_xp" class="input-lego" value="0">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalNovoAluno')">Cancelar</button>
+        <button type="submit" class="btn-lego btn-green">Salvar Aluno</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- MODAL: CONCEDER MEDALHA -->
+<div id="modalMedalha" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header" style="background: var(--lego-yellow-dark);">
+      <h3>🎖️ Conceder Medalha Lego</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalMedalha')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 14px; font-weight: 600;">
+        Selecione a conquista para premiar o aluno <strong id="modalMedalhaAlunoNome"></strong>:
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        {% for m in medalhas %}
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.8rem;">{{ m.icone }}</span>
+              <div>
+                <div style="font-weight: 800; font-size: 0.95rem;">{{ m.nome }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">{{ m.descricao }}</div>
+              </div>
+            </div>
+            <button type="button" class="btn-lego btn-yellow btn-sm" onclick="confirmarConcederMedalha({{ m.id }})">
+              +{{ m.xp_bonus }} XP 🎖️
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: AJUSTAR XP -->
+<div id="modalAjustarXp" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header" style="background: var(--lego-blue);">
+      <h3>⭐ Ajustar Tijolos de XP</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalAjustarXp')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 14px; font-weight: 600;">
+        Ajustar pontuação do aluno <strong id="modalXpAlunoNome"></strong> (Atual: <span id="modalXpAtual"></span> XP):
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Quantidade de XP (use números negativos para remover):</label>
+          <input type="number" id="inputXpQuantidade" class="input-lego" value="10">
+        </div>
+        <div>
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Motivo do Ajuste:</label>
+          <input type="text" id="inputXpMotivo" class="input-lego" value="Bônus de projeto especial" placeholder="Motivo do bônus/penalidade">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalAjustarXp')">Cancelar</button>
+      <button type="button" class="btn-lego btn-blue" onclick="confirmarAjusteXp()">Aplicar Pontos</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let alunoSelecionadoMedalha = null;
+  let alunoSelecionadoXp = null;
+
+  function abrirModalMedalha(alunoId, alunoNome) {
+    alunoSelecionadoMedalha = alunoId;
+    document.getElementById('modalMedalhaAlunoNome').innerText = alunoNome;
+    openModal('modalMedalha');
+  }
+
+  function confirmarConcederMedalha(medalhaId) {
+    if (alunoSelecionadoMedalha) {
+      concederMedalhaAluno(alunoSelecionadoMedalha, medalhaId);
+    }
+  }
+
+  function abrirModalAjustarXp(alunoId, alunoNome, xpAtual) {
+    alunoSelecionadoXp = alunoId;
+    document.getElementById('modalXpAlunoNome').innerText = alunoNome;
+    document.getElementById('modalXpAtual').innerText = xpAtual;
+    openModal('modalAjustarXp');
+  }
+
+  function confirmarAjusteXp() {
+    if (alunoSelecionadoXp) {
+      const qtd = parseInt(document.getElementById('inputXpQuantidade').value) || 0;
+      const motivo = document.getElementById('inputXpMotivo').value;
+      ajustarXpManual(alunoSelecionadoXp, qtd, motivo);
+    }
+  }
+</script>
+{% endblock %}

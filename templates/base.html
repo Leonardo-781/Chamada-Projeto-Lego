@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Sistema de Chamada Lego{% endblock %}</title>
+  <!-- Estilos Temáticos Lego -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Top Lego Header com Studs -->
+  <header class="lego-header">
+    <nav class="navbar">
+      <a href="{{ url_for('index') }}" class="brand">
+        <div class="brand-icon">🧱</div>
+        <div class="brand-text">
+          <h1>Lego Attendance & XP</h1>
+          <p>Sistema de Chamada das 3 Turmas</p>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li>
+          <a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">
+            <span>🏠</span> Início
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('chamada') }}" class="nav-link {% if request.path == '/chamada' %}active{% endif %}">
+            <span>📋</span> Fazer Chamada
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('anotacoes_page') }}" class="nav-link {% if request.path == '/anotacoes' %}active{% endif %}">
+            <span>📝</span> Diário & Anotações
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('alunos_page') }}" class="nav-link {% if request.path == '/alunos' %}active{% endif %}">
+            <span>👥</span> Alunos & Turmas
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('gamificacao') }}" class="nav-link {% if request.path == '/gamificacao' %}active{% endif %}">
+            <span>🏆</span> Ranking & Medalhas
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('historico') }}" class="nav-link {% if request.path == '/historico' %}active{% endif %}">
+            <span>📊</span> Histórico
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Rodapé Lego -->
+  <footer class="lego-footer">
+    <p>🧱 <strong>Projeto Lego de Robótica & Montagem</strong> &bull; Sistema de Controle de Frequência, Gamificação e Diário Pedagógico</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

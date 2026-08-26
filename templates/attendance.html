@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Fazer Chamada - Projeto Lego{% endblock %}
+
+{% block content %}
+
+<!-- Barra Superior com Seleção de Turma e Data -->
+<div class="attendance-header-bar">
+  <div>
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+      1. Selecione a Turma:
+    </div>
+    <div class="turma-selector-tabs">
+      {% for t in turmas %}
+        <a href="{{ url_for('chamada', turma_id=t.id, data=data_atual) }}" 
+           class="turma-tab {% if t.id == turma_selecionada %}active tab-{{ 'a' if loop.index == 1 else ('b' if loop.index == 2 else 'c') }}{% endif %}">
+          <span>🧱</span>
+          <span>{{ t.nome }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <div>
+      <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+        2. Data da Aula:
+      </div>
+      <input type="date" id="inputDataChamada" class="input-lego" value="{{ data_atual }}" 
+             onchange="window.location.href='/chamada?turma_id={{ turma_selecionada }}&data=' + this.value"
+             style="font-weight: 700; width: 170px;">
+    </div>
+
+    <div style="margin-top: 18px;" id="statusChamadaBadge">
+      <!-- Preenchido dinamicamente via JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Configurações e Anotações da Oficina Lego do Dia -->
+<div class="lego-card">
+  <div class="lego-card-header" style="background: white; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span>📝</span>
+      <span style="font-size: 1.05rem;">Anotações & Diário da Aula</span>
+    </div>
+    <a href="{{ url_for('anotacoes_page', turma_id=turma_selecionada) }}" style="font-size: 0.82rem; font-weight: 700; color: var(--lego-blue);">
+      Ver Mural Completo da Turma &rarr;
+    </a>
+  </div>
+  <div class="lego-card-body" style="padding: 16px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+      <div>
+        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">
+          ⚙️ Desafio / Tema da Aula:
+        </label>
+        <input type="text" id="topicoAula" class="input-lego" placeholder="Ex: Construção de Pontes, Robô Seguidor de Linha...">
+      </div>
+      <div>
+        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">
+          🚀 Planejamento para a Próxima Aula:
+        </label>
+        <input type="text" id="proximaAula" class="input-lego" placeholder="Ex: Testar programação do sensor giroscópio...">
+      </div>
+      <div style="grid-column: 1 / -1;">
+        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">
+          📋 Observações Pedagógicas & Diário da Turma no Dia:
+        </label>
+        <textarea id="observacoesAula" class="input-lego" rows="2" placeholder="Ex: Equipe Vermelha teve destaque na montagem; Equipe Azul precisou de apoio no loop de repetição..."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Barra de Ações Rápidas & Resumo de Frequência -->
+<div style="background: white; border: 2px solid var(--border-color); border-radius: var(--radius-brick); padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
+  
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <button type="button" class="btn-lego btn-green btn-sm" onclick="marcarTodos('presente')">
+      <span>✅</span> Marcar Todos Presentes
+    </button>
+    <button type="button" class="btn-lego btn-gray btn-sm" onclick="marcarTodos('falta')">
+      <span>❌</span> Marcar Todos Faltantes
+    </button>
+  </div>
+
+  <div style="display: flex; gap: 16px; align-items: center; font-weight: 700; font-size: 0.9rem;">
+    <div style="color: var(--lego-green);">
+      Presentes: <span id="countPresentes" style="font-size: 1.1rem; background: var(--lego-green-light); padding: 2px 8px; border-radius: 6px;">0</span>
+    </div>
+    <div style="color: var(--lego-red);">
+      Faltas: <span id="countFaltas" style="font-size: 1.1rem; background: #FEE2E2; padding: 2px 8px; border-radius: 6px;">0</span>
+    </div>
+    <div style="color: var(--lego-yellow-dark);">
+      Justificadas: <span id="countJustificadas" style="font-size: 1.1rem; background: var(--lego-yellow-light); padding: 2px 8px; border-radius: 6px;">0</span>
+    </div>
+    <div style="color: var(--text-muted);">
+      Total: <span id="countTotal" style="font-size: 1.1rem;">0</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Grade de Alunos para Chamada -->
+<div id="studentsGrid" class="students-call-grid">
+  <!-- Renderizado dinamicamente via JS -->
+</div>
+
+<!-- Botão Grande de Salvar Chamada -->
+<div style="position: sticky; bottom: 20px; z-index: 90; display: flex; justify-content: center; margin: 30px 0;">
+  <button type="button" id="btnSalvarChamada" class="btn-lego btn-red" style="font-size: 1.2rem; padding: 16px 36px; border-radius: 12px; box-shadow: 0 8px 20px rgba(227,0,11,0.4);" onclick="salvarChamadaAtual({{ turma_selecionada }}, '{{ data_atual }}')">
+    <span>🧱</span> Salvar Chamada & Anotações
+  </button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initAttendancePage({{ turma_selecionada }}, '{{ data_atual }}');
+  });
+</script>
+{% endblock %}

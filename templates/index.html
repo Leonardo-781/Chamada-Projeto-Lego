@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel Principal - Chamada Lego{% endblock %}
+
+{% block content %}
+
+<!-- Boas-vindas e Ações Rápidas -->
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+  <div>
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">
+      👋 Bem-vindo ao Projeto Lego!
+    </h2>
+    <p style="color: var(--text-muted); font-weight: 600; margin-top: 4px;">
+      Data de hoje: <strong>{{ hoje_formatado }}</strong> &bull; Controle de frequência e diário das 3 turmas
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="{{ url_for('chamada') }}" class="btn-lego btn-red">
+      <span>📋</span> Fazer Chamada
+    </a>
+    <a href="{{ url_for('anotacoes_page') }}" class="btn-lego btn-green">
+      <span>📝</span> Diário & Anotações
+    </a>
+    <a href="{{ url_for('gamificacao') }}" class="btn-lego btn-yellow">
+      <span>🏆</span> Ver Ranking
+    </a>
+  </div>
+</div>
+
+<!-- Cartões das 3 Turmas -->
+<h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+  <span>🏫</span> As 3 Turmas do Projeto Lego
+</h3>
+
+<div class="turmas-grid">
+  {% for turma in turmas %}
+    <div class="turma-card turma-{{ 'a' if loop.index == 1 else ('b' if loop.index == 2 else 'c') }}">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <span class="turma-badge" style="background: {{ turma.cor_tema }}20; color: {{ turma.cor_tema }}; border: 1px solid {{ turma.cor_tema }}40;">
+            {{ turma.codigo }}
+          </span>
+
+          {% if turma.id in turmas_feitas_hoje %}
+            <span style="font-size: 0.75rem; background: var(--lego-green-light); color: var(--lego-green-dark); padding: 3px 8px; border-radius: 6px; font-weight: 700;">
+              ✅ Chamada Feita Hoje
+            </span>
+          {% else %}
+            <span style="font-size: 0.75rem; background: #FEE2E2; color: var(--lego-red-dark); padding: 3px 8px; border-radius: 6px; font-weight: 700;">
+              ⏳ Pendente Hoje
+            </span>
+          {% endif %}
+        </div>
+
+        <h4 class="turma-title" style="margin-top: 8px;">{{ turma.nome }}</h4>
+        
+        <div class="turma-info">
+          <div>🕒 <strong>Horário:</strong> {{ turma.horario }}</div>
+          <div>📖 {{ turma.descricao }}</div>
+          {% if turma.anotacoes %}
+            <div style="margin-top: 6px; font-size: 0.78rem; background: var(--bg-color); padding: 6px 8px; border-radius: 6px; color: var(--text-main); border-left: 3px solid {{ turma.cor_tema }};">
+              📌 <em>{{ turma.anotacoes|truncate(75) }}</em>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="turma-stats-row">
+          <div class="stat-item">
+            <div class="stat-val">{{ turma.alunos|length }}</div>
+            <div class="stat-lbl">Alunos</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val">{{ turma.sessoes|length }}</div>
+            <div class="stat-lbl">Aulas Dadas</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" style="color: {{ turma.cor_tema }};">
+              {% set total_xp = turma.alunos|sum(attribute='pontos_xp') %}
+              {{ total_xp }}
+            </div>
+            <div class="stat-lbl">XP Total</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <a href="{{ url_for('chamada', turma_id=turma.id) }}" class="btn-lego btn-red btn-sm" style="flex: 1;">
+          <span>📋</span> Chamada
+        </a>
+        <a href="{{ url_for('anotacoes_page', turma_id=turma.id) }}" class="btn-lego btn-yellow btn-sm">
+          <span>📝</span> Notas
+        </a>
+        <a href="{{ url_for('alunos_page', turma_id=turma.id) }}" class="btn-lego btn-gray btn-sm">
+          <span>👥</span> Alunos
+        </a>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Seção Inferior: Top Alunos e Diário Pedagógico Recente -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
+  
+  <!-- Destaques do Ranking -->
+  <div class="lego-card">
+    <div class="lego-card-header" style="background: var(--lego-yellow-light); border-bottom: 2px solid var(--lego-yellow);">
+      <span style="font-weight: 800; font-size: 1.1rem; color: #78350F;">👑 Top Construtores Lego (XP)</span>
+      <a href="{{ url_for('gamificacao') }}" style="font-size: 0.85rem; font-weight: 700; color: var(--lego-blue);">Ver Todos &rarr;</a>
+    </div>
+    <div class="lego-card-body" style="padding: 0;">
+      <table class="leaderboard-table">
+        <tbody>
+          {% for a in top_alunos %}
+            <tr>
+              <td style="width: 50px; text-align: center;">
+                <span class="rank-badge {{ 'rank-1' if loop.index == 1 else ('rank-2' if loop.index == 2 else ('rank-3' if loop.index == 3 else 'rank-other')) }}">
+                  {{ loop.index }}
+                </span>
+              </td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div class="avatar-lego {{ a.avatar_tipo }}" style="width: 38px; height: 38px; font-size: 1.2rem;">
+                    {% if a.avatar_tipo == 'lego-ninja' %}🥷
+                    {% elif a.avatar_tipo == 'lego-astronaut' %}👨‍🚀
+                    {% elif a.avatar_tipo == 'lego-purple' %}🧙
+                    {% elif a.avatar_tipo == 'lego-green' %}🦖
+                    {% elif a.avatar_tipo == 'lego-orange' %}🏎️
+                    {% elif a.avatar_tipo == 'lego-blue' %}🤖
+                    {% elif a.avatar_tipo == 'lego-yellow' %}😀
+                    {% else %}🦸{% endif %}
+                  </div>
+                  <div>
+                    <div style="font-weight: 800; font-size: 0.95rem;">{{ a.nome }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ a.turma.nome }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span style="font-size: 0.8rem; font-weight: 700; color: var(--lego-yellow-dark); background: var(--lego-yellow-light); padding: 4px 8px; border-radius: 6px;">
+                  🧱 {{ a.pontos_xp }} XP
+                </span>
+              </td>
+              <td style="font-size: 0.85rem; font-weight: 700;">
+                {{ a.info_nivel['badge'] }} {{ a.info_nivel['titulo'] }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Últimas Anotações do Diário Pedagógico -->
+  <div class="lego-card">
+    <div class="lego-card-header" style="background: var(--lego-green-light); border-bottom: 2px solid var(--lego-green);">
+      <span style="font-weight: 800; font-size: 1.1rem; color: var(--lego-green-dark);">📝 Diário Pedagógico Recente</span>
+      <a href="{{ url_for('anotacoes_page') }}" style="font-size: 0.85rem; font-weight: 700; color: var(--lego-green-dark);">Ver Todas &rarr;</a>
+    </div>
+    <div class="lego-card-body">
+      {% if ultimas_anotacoes|length == 0 %}
+        <p style="color: var(--text-muted); text-align: center; padding: 20px;">Nenhuma anotação cadastrada ainda.</p>
+      {% endif %}
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for d in ultimas_anotacoes %}
+          <div style="background: var(--bg-color); padding: 10px 14px; border-radius: 8px; border-left: 4px solid {{ d.turma.cor_tema }};">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-weight: 800; font-size: 0.88rem; color: var(--text-main);">{{ d.titulo }}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">{{ d.data.strftime('%d/%m/%Y') }}</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #475569; margin: 0; line-height: 1.35;">{{ d.conteudo|truncate(110) }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
