@@ -130,28 +130,28 @@ def seed_database():
 
     # 3. Alunos da Turma 1 (Alfa COC - Equipe 01)
     alunos_t1 = [
-        Aluno(nome="MARIA EDUARDA ROCHA CAMPOS SILVA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-red", pontos_xp=40),
-        Aluno(nome="ANA CAROLINA ZAMPIROLI FERREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-yellow", pontos_xp=40),
-        Aluno(nome="BIANCA OLIVEIRA ALBERTON", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
-        Aluno(nome="ESTER ROSA DE MELO", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-purple", pontos_xp=40),
-        Aluno(nome="KAIQUE G. PEREIRA PRIMO", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-ninja", pontos_xp=60),
-        Aluno(nome="LARISSA SANTOS VIEIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-green", pontos_xp=40),
-        Aluno(nome="MARIA ANTÔNIA NAVES COSTA PEREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-orange", pontos_xp=40),
-        Aluno(nome="MARIA EMÍLIA MUNDIM PENA", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=60),
-        Aluno(nome="PEDRO MIGUEL DE ALCANTARA LIMA DIAS", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
+        Aluno(nome="MARIA EDUARDA ROCHA CAMPOS SILVA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-red", pontos_xp=0),
+        Aluno(nome="ANA CAROLINA ZAMPIROLI FERREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-yellow", pontos_xp=0),
+        Aluno(nome="BIANCA OLIVEIRA ALBERTON", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0),
+        Aluno(nome="ESTER ROSA DE MELO", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-purple", pontos_xp=0),
+        Aluno(nome="KAIQUE G. PEREIRA PRIMO", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-ninja", pontos_xp=0),
+        Aluno(nome="LARISSA SANTOS VIEIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-green", pontos_xp=0),
+        Aluno(nome="MARIA ANTÔNIA NAVES COSTA PEREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-orange", pontos_xp=0),
+        Aluno(nome="MARIA EMÍLIA MUNDIM PENA", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=0),
+        Aluno(nome="PEDRO MIGUEL DE ALCANTARA LIMA DIAS", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0),
     ]
 
     # 4. Alunos da Turma 2 (Alfa COC - Equipe 02)
     alunos_t2 = [
-        Aluno(nome="JULIA KINACH RODRIGUES VIEIRA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=40),
-        Aluno(nome="JOÃO ARTHUR CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=60),
-        Aluno(nome="JOÃO MATHEUS CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-ninja", pontos_xp=40),
-        Aluno(nome="LAURA MACHADO SOUSA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-purple", pontos_xp=60),
-        Aluno(nome="LUÍSA SOARES DE OLIVEIRA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-green", pontos_xp=60),
-        Aluno(nome="MANUELA DE SOUSA F. DUMONT", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-orange", pontos_xp=40),
-        Aluno(nome="MARIA LUIZA SANTOS", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-red", pontos_xp=40),
-        Aluno(nome="MARIA TEREZA FERNANDES CAETANO", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=40),
-        Aluno(nome="MARIA CECÍLIA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
+        Aluno(nome="JULIA KINACH RODRIGUES VIEIRA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=0),
+        Aluno(nome="JOÃO ARTHUR CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=0),
+        Aluno(nome="JOÃO MATHEUS CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-ninja", pontos_xp=0),
+        Aluno(nome="LAURA MACHADO SOUSA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-purple", pontos_xp=0),
+        Aluno(nome="LUÍSA SOARES DE OLIVEIRA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-green", pontos_xp=0),
+        Aluno(nome="MANUELA DE SOUSA F. DUMONT", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-orange", pontos_xp=0),
+        Aluno(nome="MARIA LUIZA SANTOS", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-red", pontos_xp=0),
+        Aluno(nome="MARIA TEREZA FERNANDES CAETANO", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=0),
+        Aluno(nome="MARIA CECÍLIA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0),
     ]
 
     db.session.add_all(alunos_t1 + alunos_t2)
