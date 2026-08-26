@@ -32,40 +32,40 @@ def seed_database():
     if Turma.query.first():
         return
 
-    print("Inicializando banco de dados com os alunos do Colégio Alfa COC...")
+    print("Inicializando banco de dados com Alfa COC e Melo Viana...")
 
-    # 1. Criação das 3 Turmas
-    turma_a = Turma(
-        nome="Colégio Alfa COC - Turma 1",
+    # 1. Criação das 3 Turmas Oficiais
+    turma_1 = Turma(
+        nome="Alfa COC - Equipe 01",
         codigo="ALFA-01",
-        descricao="Oficina de Robótica e Montagem Lego - Colégio Alfa COC",
-        horario="Segundas e Quartas, 14:00 - 15:30",
+        descricao="Robótica Lego - Alfa COC (Equipe 1)",
+        horario="Horário da Oficina",
         cor_tema="#E3000B",
         icone="robot",
-        anotacoes="📌 **Colégio Alfa COC**\nEquipe 1: 9 alunos\nEquipe 2: 9 alunos\n🔧 Montagem & Programação definidos para os desafios."
+        anotacoes="📌 **Alfa COC - Equipe 01**\nMontagem & Programação: Bianca, Maria Emília, Kaique, Pedro Miguel."
     )
 
-    turma_b = Turma(
-        nome="Colégio Alfa COC - Turma 2",
+    turma_2 = Turma(
+        nome="Alfa COC - Equipe 02",
         codigo="ALFA-02",
-        descricao="Mecanismos avançados, motores, sensores e lógica de automação.",
-        horario="Terças e Quintas, 14:00 - 15:30",
+        descricao="Robótica Lego - Alfa COC (Equipe 2)",
+        horario="Horário da Oficina",
         cor_tema="#0055BF",
         icone="cube",
-        anotacoes="📌 **Colégio Alfa COC** - Turma 2"
+        anotacoes="📌 **Alfa COC - Equipe 02**\nMontagem & Programação: Maria Cecília, Laura, Luísa, João Arthur."
     )
 
-    turma_c = Turma(
-        nome="Colégio Alfa COC - Turma 3",
-        codigo="ALFA-03",
-        descricao="Projetos complexos, desafios FLL/robótica e desafios em equipe.",
-        horario="Sextas-feiras, 14:00 - 17:00",
+    turma_3 = Turma(
+        nome="Melo Viana - Robótica Lego",
+        codigo="MELO-VIANA",
+        descricao="Oficina de Robótica e Montagem Lego - Melo Viana",
+        horario="Horário da Oficina",
         cor_tema="#00852B",
         icone="rocket",
-        anotacoes="📌 **Colégio Alfa COC** - Turma 3"
+        anotacoes="📌 **Melo Viana**\nEquipe de Robótica Lego do Melo Viana."
     )
 
-    db.session.add_all([turma_a, turma_b, turma_c])
+    db.session.add_all([turma_1, turma_2, turma_3])
     db.session.commit()
 
     # 2. Criação das Medalhas / Conquistas Lego
@@ -128,60 +128,58 @@ def seed_database():
     db.session.add_all(medalhas)
     db.session.commit()
 
-    # 3. Alunos do Colégio Alfa COC (Equipe 1 e Equipe 2)
-    alunos_turma_1 = [
-        # Equipe 01
-        Aluno(nome="Maria Eduarda Rocha Campos Silva", turma_id=turma_a.id, equipe="Equipe 01", avatar_tipo="lego-red", pontos_xp=40),
-        Aluno(nome="Ana Carolina Zampiroli Ferreira", turma_id=turma_a.id, equipe="Equipe 01", avatar_tipo="lego-yellow", pontos_xp=40),
-        Aluno(nome="Bianca Oliveira Alberton", turma_id=turma_a.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
-        Aluno(nome="Ester Rosa de Melo", turma_id=turma_a.id, equipe="Equipe 01", avatar_tipo="lego-purple", pontos_xp=40),
-        Aluno(nome="Kaique G. Pereira Primo", turma_id=turma_a.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-ninja", pontos_xp=60),
-        Aluno(nome="Larissa Santos Vieira", turma_id=turma_a.id, equipe="Equipe 01", avatar_tipo="lego-green", pontos_xp=40),
-        Aluno(nome="Maria Antônia Naves Costa Pereira", turma_id=turma_a.id, equipe="Equipe 01", avatar_tipo="lego-orange", pontos_xp=40),
-        Aluno(nome="Maria Emília Mundim Pena", turma_id=turma_a.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=60),
-        Aluno(nome="Pedro Miguel de Alcantara Lima Dias", turma_id=turma_a.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
-        
-        # Equipe 02
-        Aluno(nome="Julia Kinach Rodrigues Vieira", turma_id=turma_a.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=40),
-        Aluno(nome="João Arthur Caixeta F. Silva", turma_id=turma_a.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=60),
-        Aluno(nome="João Matheus Caixeta F. Silva", turma_id=turma_a.id, equipe="Equipe 02", avatar_tipo="lego-ninja", pontos_xp=40),
-        Aluno(nome="Laura Machado Sousa", turma_id=turma_a.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-purple", pontos_xp=60),
-        Aluno(nome="Luísa Soares de Oliveira", turma_id=turma_a.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-green", pontos_xp=60),
-        Aluno(nome="Manuela de Sousa F. Dumont", turma_id=turma_a.id, equipe="Equipe 02", avatar_tipo="lego-orange", pontos_xp=40),
-        Aluno(nome="Maria Luiza Santos", turma_id=turma_a.id, equipe="Equipe 02", avatar_tipo="lego-red", pontos_xp=40),
-        Aluno(nome="Maria Tereza Fernandes Caetano", turma_id=turma_a.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=40),
-        Aluno(nome="Maria Cecília", turma_id=turma_a.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
+    # 3. Alunos da Turma 1 (Alfa COC - Equipe 01)
+    alunos_t1 = [
+        Aluno(nome="MARIA EDUARDA ROCHA CAMPOS SILVA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-red", pontos_xp=40),
+        Aluno(nome="ANA CAROLINA ZAMPIROLI FERREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-yellow", pontos_xp=40),
+        Aluno(nome="BIANCA OLIVEIRA ALBERTON", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
+        Aluno(nome="ESTER ROSA DE MELO", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-purple", pontos_xp=40),
+        Aluno(nome="KAIQUE G. PEREIRA PRIMO", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-ninja", pontos_xp=60),
+        Aluno(nome="LARISSA SANTOS VIEIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-green", pontos_xp=40),
+        Aluno(nome="MARIA ANTÔNIA NAVES COSTA PEREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-orange", pontos_xp=40),
+        Aluno(nome="MARIA EMÍLIA MUNDIM PENA", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=60),
+        Aluno(nome="PEDRO MIGUEL DE ALCANTARA LIMA DIAS", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
     ]
 
-    db.session.add_all(alunos_turma_1)
+    # 4. Alunos da Turma 2 (Alfa COC - Equipe 02)
+    alunos_t2 = [
+        Aluno(nome="JULIA KINACH RODRIGUES VIEIRA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=40),
+        Aluno(nome="JOÃO ARTHUR CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=60),
+        Aluno(nome="JOÃO MATHEUS CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-ninja", pontos_xp=40),
+        Aluno(nome="LAURA MACHADO SOUSA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-purple", pontos_xp=60),
+        Aluno(nome="LUÍSA SOARES DE OLIVEIRA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-green", pontos_xp=60),
+        Aluno(nome="MANUELA DE SOUSA F. DUMONT", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-orange", pontos_xp=40),
+        Aluno(nome="MARIA LUIZA SANTOS", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-red", pontos_xp=40),
+        Aluno(nome="MARIA TEREZA FERNANDES CAETANO", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=40),
+        Aluno(nome="MARIA CECÍLIA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=60),
+    ]
+
+    db.session.add_all(alunos_t1 + alunos_t2)
     db.session.commit()
 
-    # 4. Medalhas iniciais
-    med_primeiro_bloco = Medalha.query.filter_by(codigo="primeiro_bloco").first()
+    # 5. Conquistas
+    med_primeiro = Medalha.query.filter_by(codigo="primeiro_bloco").first()
     med_robo = Medalha.query.filter_by(codigo="primeiro_robo").first()
 
-    for a in alunos_turma_1:
-        if med_primeiro_bloco:
-            db.session.add(ConquistaAluno(aluno_id=a.id, medalha_id=med_primeiro_bloco.id, data_conquista=a.created_at))
+    for a in (alunos_t1 + alunos_t2):
+        if med_primeiro:
+            db.session.add(ConquistaAluno(aluno_id=a.id, medalha_id=med_primeiro.id))
         if "Montagem" in a.equipe and med_robo:
             db.session.add(ConquistaAluno(aluno_id=a.id, medalha_id=med_robo.id))
 
-    # 5. Diário de Bordo Inicial
+    # 6. Diário de Bordo
     hoje = date.today()
     diario = DiarioBordo(
-        turma_id=turma_a.id,
+        turma_id=turma_1.id,
         data=hoje,
-        titulo="Divisão das Equipes de Robótica - Colégio Alfa COC",
-        conteudo="Equipes oficiais formadas:\n\n"
-                 "🧱 **Equipe 01** (9 alunos):\n"
-                 "- Montagem e Programação: Bianca, Maria Emília, Kaique, Pedro Miguel.\n"
-                 "- Estrutura e Organização: Maria Eduarda, Ana Carolina, Ester, Larissa, Maria Antônia.\n\n"
-                 "⚙️ **Equipe 02** (9 alunos):\n"
-                 "- Montagem e Programação: Maria Cecília, Laura, Luísa, João Arthur.\n"
-                 "- Estrutura e Organização: Julia, João Matheus, Manuela, Maria Luiza, Maria Tereza.",
+        titulo="Início das Atividades Lego - Alfa COC & Melo Viana",
+        conteudo="Configuração das 3 turmas:\n"
+                 "- Alfa COC - Equipe 01 (9 alunos)\n"
+                 "- Alfa COC - Equipe 02 (9 alunos)\n"
+                 "- Melo Viana (Pronta para cadastro dos alunos)",
         categoria="Desafio Lego"
     )
     db.session.add(diario)
     db.session.commit()
 
-    print("Banco de dados com alunos do Colégio Alfa COC configurado!")
+    print("Banco de dados com Alfa COC e Melo Viana configurado!")
