@@ -11,3 +11,6 @@ instance/
 env/
 venv/
 .vscode/
+*firebase*.json
+*adminsdk*.json
+serviceAccountKey.json
