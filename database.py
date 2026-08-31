@@ -2,13 +2,14 @@ import os
 import sqlite3
 from datetime import date, timedelta
 from sqlalchemy import text
-from models import db, Turma, Aluno, SessaoChamada, RegistroPresenca, Medalha, ConquistaAluno, DiarioBordo
+from models import db, Turma, Aluno, SessaoChamada, RegistroPresenca, Medalha, ConquistaAluno, DiarioBordo, Atividade, EntregaAtividade, SlideAula, DuvidaAluno
 
 def init_db(app):
     with app.app_context():
         db.create_all()
         migrar_colunas(app)
         seed_database()
+        seed_atividades_e_materiais()
 
 def migrar_colunas(app):
     try:
@@ -183,3 +184,116 @@ def seed_database():
     db.session.commit()
 
     print("Banco de dados com Alfa COC e Melo Viana configurado!")
+
+
+def seed_atividades_e_materiais():
+    # Verifica se já existem atividades
+    if Atividade.query.first():
+        return
+
+    print("Inicializando Desafios Lego, Slides e Fórum de Dúvidas...")
+    hoje = date.today()
+    turmas = Turma.query.all()
+    t1_id = turmas[0].id if len(turmas) > 0 else None
+    t2_id = turmas[1].id if len(turmas) > 1 else None
+
+    # 1. Atividades e Desafios Lego
+    atividades = [
+        Atividade(
+            turma_id=None, # Global
+            titulo="Desafio 01: Robô Seguidor de Linha",
+            descricao="Construa a base motriz com dois motores e programe o sensor de cor/luz para seguir a linha preta sem sair da pista. Grave um vídeo curto de até 30s mostrando o robô completando o trajeto.",
+            kit_lego="Lego SPIKE Prime",
+            xp_recompensa=50,
+            data_limite=hoje + timedelta(days=14),
+            link_material="https://education.lego.com/pt-br/lessons",
+            status="ativo"
+        ),
+        Atividade(
+            turma_id=None,
+            titulo="Desafio 02: Garra Mecânica Motorizada",
+            descricao="Projete e monte um mecanismo de garra utilizando engrenagens e motor angular capaz de erguer e transportar uma peça Lego de 2x4 por pelo menos 1 metro de distância.",
+            kit_lego="Lego SPIKE Prime / WeDo",
+            xp_recompensa=60,
+            data_limite=hoje + timedelta(days=21),
+            link_material="https://education.lego.com/pt-br/lessons",
+            status="ativo"
+        ),
+        Atividade(
+            turma_id=None,
+            titulo="Desafio 03: Carro Anticolisão com Sensor Ultrassônico",
+            descricao="Construa um veículo autônomo que ande para frente em linha reta e, ao detectar um obstáculo a menos de 15 cm, pare, emita um sinal sonoro e manobre 90 graus para a direita.",
+            kit_lego="Lego SPIKE Prime",
+            xp_recompensa=70,
+            data_limite=hoje + timedelta(days=28),
+            link_material="https://education.lego.com/pt-br/lessons",
+            status="ativo"
+        )
+    ]
+    db.session.add_all(atividades)
+    db.session.commit()
+
+    # 2. Slides e Manuais de Aula
+    slides = [
+        SlideAula(
+            turma_id=None,
+            titulo="Aula 01: Introdução ao Lego SPIKE Prime e Hub Inteligente",
+            descricao="Apresentação com os componentes básicos do kit: Hub inteligente, motores de média/grande potência, sensores de cor, força e distância.",
+            numero_aula=1,
+            link_slide="https://docs.google.com/presentation",
+            tipo="slides"
+        ),
+        SlideAula(
+            turma_id=None,
+            titulo="Aula 02: Mecânica Básica - Engrenagens, Redução e Multiplicação",
+            descricao="Guia ilustrado explicando torque, velocidade, proporção de engrenagens 8T, 24T, 40T e eixos transversais.",
+            numero_aula=2,
+            link_slide="https://education.lego.com",
+            tipo="manual_montagem"
+        ),
+        SlideAula(
+            turma_id=None,
+            titulo="Aula 03: Programação em Blocos (Word Blocks) & Lógica de Sensores",
+            descricao="Tutorial prático ensinando loops de repetição, condições 'Se... Então' e calibração do sensor de luminosidade.",
+            numero_aula=3,
+            link_slide="https://education.lego.com",
+            tipo="apostila"
+        ),
+        SlideAula(
+            turma_id=None,
+            titulo="Aula 04: Construção de Chassi e Tração 4x2",
+            descricao="Passo a passo em vídeo demonstrando a fixação dos motores angulares no chassi estrutural.",
+            numero_aula=4,
+            link_slide="https://youtube.com",
+            tipo="video_tutorial"
+        )
+    ]
+    db.session.add_all(slides)
+    db.session.commit()
+
+    # 3. Dúvidas Frequentes da Oficina
+    duvidas = [
+        DuvidaAluno(
+            turma_id=t1_id,
+            nome_autor="Aluno(a) Alfa COC",
+            titulo="Como calibrar o sensor de cor para pista clara e escura?",
+            pergunta="Professor, nosso sensor de cor está oscilando entre preto e branco na junção da pista. Qual a melhor porcentagem de reflexão para o bloco de decisão?",
+            categoria="Programação & Sensores",
+            status="respondida",
+            resposta_professor="Excelente pergunta! Recomendamos fazer a leitura em tempo real no app da Lego: meça o valor na linha preta (ex: 15%) e no chão branco (ex: 85%). O ponto de corte ideal é a média entre eles: (15 + 85) / 2 = 50%!",
+            respondido_por="Professor de Robótica"
+        ),
+        DuvidaAluno(
+            turma_id=t2_id,
+            nome_autor="Equipe 02",
+            titulo="Engrenagem escapando na subida da rampa",
+            pergunta="Quando nosso robô tenta subir a rampa inclinada, as engrenagens estalam e perdem tração. Como travar os eixos?",
+            categoria="Montagem / Mecânica",
+            status="respondida",
+            resposta_professor="Para evitar que o eixo flexione com o torque, utilize duas vigas paralelas para suportar o eixo em ambas as extremidades (apoio duplo) em vez de apoio único.",
+            respondido_por="Professor de Robótica"
+        )
+    ]
+    db.session.add_all(duvidas)
+    db.session.commit()
+    print("Atividades, Slides e Dúvidas populados com sucesso!")

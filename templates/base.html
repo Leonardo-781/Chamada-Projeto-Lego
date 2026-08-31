@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Sistema de Chamada Lego{% endblock %}</title>
+  <title>{% block title %}Portal de Robótica Lego{% endblock %}</title>
   <!-- Estilos Temáticos Lego -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -15,8 +15,8 @@
       <a href="{{ url_for('index') }}" class="brand">
         <div class="brand-icon">🧱</div>
         <div class="brand-text">
-          <h1>Lego Attendance & XP</h1>
-          <p>Sistema de Chamada das 3 Turmas</p>
+          <h1>Lego Robotics Hub</h1>
+          <p>Portal Pedagógico & Controle de Frequência</p>
         </div>
       </a>
 
@@ -28,22 +28,37 @@
         </li>
         <li>
           <a href="{{ url_for('chamada') }}" class="nav-link {% if request.path == '/chamada' %}active{% endif %}">
-            <span>📋</span> Fazer Chamada
+            <span>📋</span> Chamada
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('atividades_page') }}" class="nav-link {% if request.path == '/atividades' %}active{% endif %}">
+            <span>🎯</span> Atividades
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('slides_page') }}" class="nav-link {% if request.path == '/slides' %}active{% endif %}">
+            <span>📑</span> Slides
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('forum_page') }}" class="nav-link {% if request.path == '/duvidas' %}active{% endif %}">
+            <span>💬</span> Dúvidas
           </a>
         </li>
         <li>
           <a href="{{ url_for('anotacoes_page') }}" class="nav-link {% if request.path == '/anotacoes' %}active{% endif %}">
-            <span>📝</span> Diário & Anotações
+            <span>📝</span> Diário
           </a>
         </li>
         <li>
           <a href="{{ url_for('alunos_page') }}" class="nav-link {% if request.path == '/alunos' %}active{% endif %}">
-            <span>👥</span> Alunos & Turmas
+            <span>👥</span> Alunos
           </a>
         </li>
         <li>
           <a href="{{ url_for('gamificacao') }}" class="nav-link {% if request.path == '/gamificacao' %}active{% endif %}">
-            <span>🏆</span> Ranking & Medalhas
+            <span>🏆</span> Ranking
           </a>
         </li>
         <li>
@@ -62,7 +77,7 @@
 
   <!-- Rodapé Lego -->
   <footer class="lego-footer">
-    <p>🧱 <strong>Projeto Lego de Robótica & Montagem</strong> &bull; Sistema de Controle de Frequência, Gamificação e Diário Pedagógico</p>
+    <p>🧱 <strong>Portal de Robótica & Montagem LEGO</strong> &bull; Alfa COC & Melo Viana &bull; Atividades, Slides, Dúvidas e Gamificação</p>
   </footer>
 
   <!-- Scripts -->

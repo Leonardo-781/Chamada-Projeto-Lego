@@ -1,0 +1,512 @@
+{% extends 'base.html' %}
+
+{% block title %}Atividades & Desafios Lego{% endblock %}
+
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+  <div>
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">
+      🎯 Desafios & Atividades Lego
+    </h2>
+    <p style="color: var(--text-muted); font-weight: 600; margin-top: 4px;">
+      Projetos práticos de montagem e programação com recompensas em <strong>Tijolos de XP</strong>
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button type="button" class="btn-lego btn-green" onclick="openModal('modalNovaAtividade')">
+      <span>➕</span> Novo Desafio
+    </button>
+    <button type="button" class="btn-lego btn-blue" onclick="openModal('modalEnviarEntrega')">
+      <span>📤</span> Enviar Entrega / Robô
+    </button>
+  </div>
+</div>
+
+<!-- Abas de Navegação (Desafios vs Entregas / Correções) -->
+<div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap;">
+  <button type="button" class="btn-lego btn-yellow btn-tab-view active" id="tabBtnDesafios" onclick="switchActivityTab('desafios')">
+    <span>🎯</span> Desafios Disponíveis ({{ atividades|length }})
+  </button>
+  <button type="button" class="btn-lego btn-gray btn-tab-view" id="tabBtnEntregas" onclick="switchActivityTab('entregas')">
+    <span>📥</span> Painel de Entregas & Avaliação ({{ entregas|length }})
+  </button>
+</div>
+
+<!-- Filtros por Turma -->
+<div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+  <a href="{{ url_for('atividades_page') }}" class="btn-lego {% if not turma_filtro %}btn-red{% else %}btn-gray{% endif %} btn-sm">
+    Todas as Turmas
+  </a>
+  {% for t in turmas %}
+    <a href="{{ url_for('atividades_page', turma_id=t.id) }}" class="btn-lego {% if turma_filtro == t.id %}btn-red{% else %}btn-gray{% endif %} btn-sm">
+      {{ t.nome }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- ==========================================
+     ABA 1: DESAFIOS DISPONÍVEIS
+     ========================================== -->
+<div id="tabDesafiosContent">
+  {% if atividades|length == 0 %}
+    <div class="lego-card" style="text-align: center; padding: 40px;">
+      <div style="font-size: 3rem;">🧱</div>
+      <h3 style="margin: 12px 0;">Nenhum desafio cadastrado</h3>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">Cadastre o primeiro desafio de montagem e programação para os alunos.</p>
+      <button type="button" class="btn-lego btn-green" onclick="openModal('modalNovaAtividade')">Cadastrar Desafio</button>
+    </div>
+  {% endif %}
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;">
+    {% for ativ in atividades %}
+      <div class="lego-card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 6px solid {{ ativ.turma.cor_tema if ativ.turma else 'var(--lego-yellow-dark)' }};">
+        <div>
+          <div class="lego-card-header" style="background: white; border-bottom: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span class="turma-badge" style="background: {{ ativ.turma.cor_tema if ativ.turma else 'var(--lego-yellow-dark)' }}20; color: {{ ativ.turma.cor_tema if ativ.turma else 'var(--lego-yellow-dark)' }};">
+                {{ ativ.turma.codigo if ativ.turma else 'TODAS AS TURMAS' }}
+              </span>
+              <span style="font-size: 0.85rem; font-weight: 800; color: var(--lego-yellow-dark); background: var(--lego-yellow-light); padding: 3px 8px; border-radius: 6px;">
+                ⭐ +{{ ativ.xp_recompensa }} XP
+              </span>
+            </div>
+          </div>
+
+          <div class="lego-card-body" style="padding: 16px;">
+            <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">
+              {{ ativ.titulo }}
+            </h4>
+            
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--lego-blue-dark); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              <span>🤖 Kit Recomendado:</span> <strong>{{ ativ.kit_lego }}</strong>
+            </div>
+
+            <p style="font-size: 0.88rem; color: #475569; line-height: 1.45; margin-bottom: 14px; white-space: pre-line;">
+              {{ ativ.descricao }}
+            </p>
+
+            <div style="background: var(--bg-color); padding: 10px; border-radius: 8px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                📅 <strong>Prazo:</strong> {{ ativ.data_limite.strftime('%d/%m/%Y') if ativ.data_limite else 'Sem prazo' }}
+              </div>
+              <div>
+                📥 <strong>Entregas:</strong> {{ ativ.entregas|length }}
+              </div>
+            </div>
+
+            {% if ativ.link_material %}
+              <div style="margin-top: 10px;">
+                <a href="{{ ativ.link_material }}" target="_blank" style="font-size: 0.82rem; font-weight: 700; color: var(--lego-blue); display: inline-flex; align-items: center; gap: 4px;">
+                  📖 Ver Guia / Material de Apoio &rarr;
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div style="padding: 12px 16px; background: #F8FAFC; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+          <button type="button" class="btn-lego btn-blue btn-sm" onclick="abrirModalEntregaParaDesafio({{ ativ.id }}, '{{ ativ.titulo }}')">
+            <span>📤</span> Entregar Solução
+          </button>
+          <button type="button" class="btn-lego btn-gray btn-sm" onclick="excluirAtividade({{ ativ.id }})" title="Excluir Desafio">
+            🗑️
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+<!-- ==========================================
+     ABA 2: ENTREGAS & PAINEL DO PROFESSOR
+     ========================================== -->
+<div id="tabEntregasContent" style="display: none;">
+  <div class="lego-card">
+    <div class="lego-card-header" style="background: var(--lego-blue-light); border-bottom: 2px solid var(--lego-blue);">
+      <span style="font-weight: 800; font-size: 1.1rem; color: var(--lego-blue-dark);">📋 Entregas dos Alunos & Correções</span>
+      <span style="font-size: 0.85rem; font-weight: 700; color: var(--lego-blue-dark);">{{ entregas|length }} submissões</span>
+    </div>
+    <div class="lego-card-body" style="padding: 0; overflow-x: auto;">
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Aluno & Equipe</th>
+            <th>Desafio</th>
+            <th>Solução & Mídia</th>
+            <th>Status</th>
+            <th>Feedback / XP</th>
+            <th style="text-align: right;">Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if entregas|length == 0 %}
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                Nenhuma entrega de atividade submetida ainda.
+              </td>
+            </tr>
+          {% endif %}
+
+          {% for ent in entregas %}
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div class="avatar-lego {{ ent.aluno.avatar_tipo }}" style="width: 38px; height: 38px; font-size: 1.2rem;">
+                    {% if ent.aluno.avatar_tipo == 'lego-ninja' %}🥷{% elif ent.aluno.avatar_tipo == 'lego-astronaut' %}👨‍🚀{% elif ent.aluno.avatar_tipo == 'lego-purple' %}🧙{% elif ent.aluno.avatar_tipo == 'lego-green' %}🦖{% elif ent.aluno.avatar_tipo == 'lego-orange' %}🏎️{% elif ent.aluno.avatar_tipo == 'lego-blue' %}🤖{% elif ent.aluno.avatar_tipo == 'lego-yellow' %}😀{% else %}🦸{% endif %}
+                  </div>
+                  <div>
+                    <div style="font-weight: 800; font-size: 0.95rem;">{{ ent.aluno.nome }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ ent.aluno.turma.codigo }} &bull; {{ ent.equipe }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div style="font-weight: 700; font-size: 0.9rem;">{{ ent.atividade.titulo }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Enviado em {{ ent.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
+              </td>
+              <td>
+                <div style="max-width: 250px;">
+                  {% if ent.descricao_solucao %}
+                    <p style="font-size: 0.82rem; color: #334155; margin-bottom: 4px;">{{ ent.descricao_solucao|truncate(80) }}</p>
+                  {% endif %}
+                  {% if ent.link_foto_video %}
+                    <a href="{{ ent.link_foto_video }}" target="_blank" style="font-size: 0.78rem; font-weight: 700; color: var(--lego-blue); display: inline-flex; align-items: center; gap: 3px;">
+                      🔗 Ver Foto/Vídeo do Robô
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                {% if ent.status == 'aprovado' %}
+                  <span style="background: var(--lego-green-light); color: var(--lego-green-dark); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">
+                    ✅ Aprovado (+{{ ent.xp_concedido }} XP)
+                  </span>
+                {% elif ent.status == 'revisar' %}
+                  <span style="background: var(--lego-yellow-light); color: var(--lego-yellow-dark); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">
+                    ⚠️ Revisar
+                  </span>
+                {% else %}
+                  <span style="background: #F1F5F9; color: #475569; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">
+                    ⏳ Pendente
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                <div style="font-size: 0.82rem; color: #475569;">
+                  {% if ent.feedback_professor %}
+                    <em>"{{ ent.feedback_professor }}"</em>
+                  {% else %}
+                    <span style="color: var(--text-muted);">Sem feedback</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td style="text-align: right;">
+                <button type="button" class="btn-lego btn-yellow btn-sm" onclick="abrirModalAvaliar({{ ent.id }}, '{{ ent.aluno.nome }}', '{{ ent.atividade.titulo }}', {{ ent.atividade.xp_recompensa }})">
+                  ⭐ Avaliar
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: NOVO DESAFIO LEGO -->
+<div id="modalNovaAtividade" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header" style="background: var(--lego-red);">
+      <h3>🎯 Novo Desafio Lego</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalNovaAtividade')">&times;</button>
+    </div>
+    <form onsubmit="salvarNovaAtividade(event)">
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Título do Desafio:</label>
+            <input type="text" name="titulo" class="input-lego" placeholder="Ex: Desafio do Robô Empilhador de Peças" required>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Turma Alvo:</label>
+            <select name="turma_id" class="input-lego">
+              <option value="">🌐 Todas as Turmas</option>
+              {% for t in turmas %}
+                <option value="{{ t.id }}">{{ t.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Kit Lego Recomendado:</label>
+              <select name="kit_lego" class="input-lego">
+                <option value="Lego SPIKE Prime">Lego SPIKE Prime</option>
+                <option value="Lego BricQ Motion">Lego BricQ Motion</option>
+                <option value="Lego WeDo 2.0">Lego WeDo 2.0</option>
+                <option value="Lego Mindstorms EV3">Lego Mindstorms EV3</option>
+                <option value="Qualquer Kit Lego">Qualquer Kit Lego</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Recompensa (XP):</label>
+              <input type="number" name="xp_recompensa" class="input-lego" value="50" required>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Data Limite de Entrega (Opcional):</label>
+            <input type="date" name="data_limite" class="input-lego">
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Link do Manual / Tutorial (Opcional):</label>
+            <input type="url" name="link_material" class="input-lego" placeholder="https://education.lego.com/...">
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Instruções e Objetivos da Atividade:</label>
+            <textarea name="descricao" class="input-lego" rows="4" placeholder="Descreva os requisitos de montagem, sensores que devem ser programados e critérios de conclusão..." required></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalNovaAtividade')">Cancelar</button>
+        <button type="submit" class="btn-lego btn-green">Publicar Desafio</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- MODAL: ENVIAR ENTREGA DO ALUNO / EQUIPE -->
+<div id="modalEnviarEntrega" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header" style="background: var(--lego-blue);">
+      <h3>📤 Enviar Entrega / Projeto Lego</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalEnviarEntrega')">&times;</button>
+    </div>
+    <form onsubmit="submeterEntregaAtividade(event)">
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Selecione o Desafio:</label>
+            <select name="atividade_id" id="selectEntregaAtividade" class="input-lego" required>
+              {% for ativ in atividades %}
+                <option value="{{ ativ.id }}">{{ ativ.titulo }} (+{{ ativ.xp_recompensa }} XP)</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Aluno Responsável / Equipe:</label>
+            <select name="aluno_id" class="input-lego" required>
+              {% for al in alunos %}
+                <option value="{{ al.id }}">{{ al.nome }} ({{ al.turma.codigo }} - {{ al.equipe }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Link da Foto ou Vídeo de Demonstração:</label>
+            <input type="url" name="link_foto_video" class="input-lego" placeholder="Link do Google Drive, Fotos, YouTube ou Instagram...">
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Como a Equipe Resolveu o Desafio?</label>
+            <textarea name="descricao_solucao" class="input-lego" rows="3" placeholder="Explique como o robô foi construído, quais engrenagens e sensores usaram e a lógica da programação..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalEnviarEntrega')">Cancelar</button>
+        <button type="submit" class="btn-lego btn-blue">Enviar Entrega</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- MODAL: AVALIAR ENTREGA (PROFESSOR) -->
+<div id="modalAvaliarEntrega" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header" style="background: var(--lego-yellow-dark);">
+      <h3>⭐ Avaliar Entrega & Creditar XP</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalAvaliarEntrega')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 12px; font-weight: 600;">
+        Avaliando entrega de <strong id="modalAvaliarAlunoNome"></strong> no desafio <strong id="modalAvaliarDesafioTitulo"></strong>:
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Status da Avaliação:</label>
+          <select id="modalAvaliarStatus" class="input-lego">
+            <option value="aprovado">✅ Aprovado (Conceder XP ao Aluno)</option>
+            <option value="revisar">⚠️ Precisa de Ajustes / Revisar</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Tijolos de XP a Conceder:</label>
+          <input type="number" id="modalAvaliarXp" class="input-lego" value="50">
+        </div>
+
+        <div>
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Feedback Pedagógico do Professor:</label>
+          <textarea id="modalAvaliarFeedback" class="input-lego" rows="3" placeholder="Parabéns pela construção! Ótimo uso de engrenagens e sensor..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalAvaliarEntrega')">Cancelar</button>
+      <button type="button" class="btn-lego btn-green" onclick="confirmarAvaliacao()">Salvar Avaliação & XP</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let entregaSelecionadaId = null;
+
+  function switchActivityTab(tab) {
+    const tabDesafios = document.getElementById('tabDesafiosContent');
+    const tabEntregas = document.getElementById('tabEntregasContent');
+    const btnDesafios = document.getElementById('tabBtnDesafios');
+    const btnEntregas = document.getElementById('tabBtnEntregas');
+
+    if (tab === 'desafios') {
+      tabDesafios.style.display = 'block';
+      tabEntregas.style.display = 'none';
+      btnDesafios.className = 'btn-lego btn-yellow btn-tab-view active';
+      btnEntregas.className = 'btn-lego btn-gray btn-tab-view';
+    } else {
+      tabDesafios.style.display = 'none';
+      tabEntregas.style.display = 'block';
+      btnDesafios.className = 'btn-lego btn-gray btn-tab-view';
+      btnEntregas.className = 'btn-lego btn-yellow btn-tab-view active';
+    }
+  }
+
+  function abrirModalEntregaParaDesafio(desafioId, desafioTitulo) {
+    const sel = document.getElementById('selectEntregaAtividade');
+    if (sel) sel.value = desafioId;
+    openModal('modalEnviarEntrega');
+  }
+
+  async function salvarNovaAtividade(e) {
+    e.preventDefault();
+    const form = e.target;
+    const titulo = form.titulo.value;
+    const turma_id = form.turma_id.value;
+    const kit_lego = form.kit_lego.value;
+    const xp_recompensa = form.xp_recompensa.value;
+    const data_limite = form.data_limite.value;
+    const link_material = form.link_material.value;
+    const descricao = form.descricao.value;
+
+    try {
+      const res = await fetch('/api/atividades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulo, turma_id, kit_lego, xp_recompensa, data_limite, link_material, descricao })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        closeModal('modalNovaAtividade');
+        setTimeout(() => location.reload(), 600);
+      } else {
+        showToast(data.error || 'Erro ao criar desafio.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro ao comunicar com o servidor.', 'error');
+    }
+  }
+
+  async function submeterEntregaAtividade(e) {
+    e.preventDefault();
+    const form = e.target;
+    const atividade_id = form.atividade_id.value;
+    const aluno_id = form.aluno_id.value;
+    const link_foto_video = form.link_foto_video.value;
+    const descricao_solucao = form.descricao_solucao.value;
+
+    try {
+      const res = await fetch('/api/atividades/entregar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ atividade_id, aluno_id, link_foto_video, descricao_solucao })
+      });
+      const data = await res.json();
+      if (data.success) {
+        triggerLegoConfetti();
+        showToast(data.message, 'success');
+        closeModal('modalEnviarEntrega');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.error || 'Erro ao enviar entrega.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro ao comunicar com o servidor.', 'error');
+    }
+  }
+
+  function abrirModalAvaliar(entregaId, alunoNome, desafioTitulo, xpSugerido) {
+    entregaSelecionadaId = entregaId;
+    document.getElementById('modalAvaliarAlunoNome').innerText = alunoNome;
+    document.getElementById('modalAvaliarDesafioTitulo').innerText = desafioTitulo;
+    document.getElementById('modalAvaliarXp').value = xpSugerido;
+    openModal('modalAvaliarEntrega');
+  }
+
+  async function confirmarAvaliacao() {
+    if (!entregaSelecionadaId) return;
+
+    const status = document.getElementById('modalAvaliarStatus').value;
+    const xp_concedido = parseInt(document.getElementById('modalAvaliarXp').value) || 0;
+    const feedback_professor = document.getElementById('modalAvaliarFeedback').value;
+
+    try {
+      const res = await fetch(`/api/entregas/${entregaSelecionadaId}/avaliar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, xp_concedido, feedback_professor })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (status === 'aprovado') triggerLegoConfetti();
+        showToast(data.message, 'success');
+        closeModal('modalAvaliarEntrega');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.error || 'Erro ao avaliar entrega.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro ao comunicar com o servidor.', 'error');
+    }
+  }
+
+  async function excluirAtividade(id) {
+    if (!confirm('Tem certeza que deseja excluir este desafio?')) return;
+    try {
+      const res = await fetch(`/api/atividades/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Desafio excluído com sucesso!', 'success');
+        setTimeout(() => location.reload(), 600);
+      }
+    } catch (err) {
+      showToast('Erro ao excluir desafio.', 'error');
+    }
+  }
+</script>
+{% endblock %}

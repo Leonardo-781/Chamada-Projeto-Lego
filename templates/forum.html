@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+
+{% block title %}Dúvidas & Fórum Lego{% endblock %}
+
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+  <div>
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">
+      💬 Fórum de Dúvidas & Suporte Lego
+    </h2>
+    <p style="color: var(--text-muted); font-weight: 600; margin-top: 4px;">
+      Espaço para tirar dúvidas sobre montagens de robôs, engrenagens, sensores e blocos de código
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button type="button" class="btn-lego btn-yellow" onclick="openModal('modalNovaDuvida')">
+      <span>❓</span> Fazer uma Pergunta
+    </button>
+  </div>
+</div>
+
+<!-- Filtros por Categoria e Status -->
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <a href="{{ url_for('forum_page') }}" class="btn-lego {% if not categoria_filtro and not status_filtro %}btn-yellow{% else %}btn-gray{% endif %} btn-sm">
+      Todas as Dúvidas ({{ duvidas|length }})
+    </a>
+    <a href="{{ url_for('forum_page', categoria='Programação & Sensores') }}" class="btn-lego {% if categoria_filtro == 'Programação & Sensores' %}btn-blue{% else %}btn-gray{% endif %} btn-sm">
+      🤖 Programação & Sensores
+    </a>
+    <a href="{{ url_for('forum_page', categoria='Montagem / Mecânica') }}" class="btn-lego {% if categoria_filtro == 'Montagem / Mecânica' %}btn-blue{% else %}btn-gray{% endif %} btn-sm">
+      ⚙️ Montagem & Mecânica
+    </a>
+    <a href="{{ url_for('forum_page', categoria='Peças & Kits') }}" class="btn-lego {% if categoria_filtro == 'Peças & Kits' %}btn-blue{% else %}btn-gray{% endif %} btn-sm">
+      📦 Peças & Kits
+    </a>
+  </div>
+
+  <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+    <a href="{{ url_for('forum_page', status='aberta') }}" class="btn-lego {% if status_filtro == 'aberta' %}btn-red{% else %}btn-gray{% endif %} btn-sm">
+      ⏳ Abertas
+    </a>
+    <a href="{{ url_for('forum_page', status='respondida') }}" class="btn-lego {% if status_filtro == 'respondida' %}btn-green{% else %}btn-gray{% endif %} btn-sm">
+      ✅ Respondidas
+    </a>
+  </div>
+</div>
+
+<!-- Lista de Dúvidas / Fórum -->
+{% if duvidas|length == 0 %}
+  <div class="lego-card" style="text-align: center; padding: 40px;">
+    <div style="font-size: 3rem;">💬</div>
+    <h3 style="margin: 12px 0;">Nenhuma dúvida encontrada</h3>
+    <p style="color: var(--text-muted); margin-bottom: 16px;">Os alunos e equipes podem postar dúvidas sobre as oficinas aqui para o professor responder.</p>
+    <button type="button" class="btn-lego btn-yellow" onclick="openModal('modalNovaDuvida')">Postar Primeira Dúvida</button>
+  </div>
+{% endif %}
+
+<div style="display: flex; flex-direction: column; gap: 16px;">
+  {% for d in duvidas %}
+    <div class="lego-card" style="margin-bottom: 0;">
+      <div class="lego-card-body" style="padding: 20px;">
+        
+        <!-- Cabeçalho da Dúvida -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="avatar-lego {{ d.aluno.avatar_tipo if d.aluno else 'avatar-blue' }}" style="width: 44px; height: 44px; font-size: 1.4rem;">
+              {% if d.aluno and d.aluno.avatar_tipo == 'lego-ninja' %}🥷
+              {% elif d.aluno and d.aluno.avatar_tipo == 'lego-astronaut' %}👨‍🚀
+              {% elif d.aluno and d.aluno.avatar_tipo == 'lego-purple' %}🧙
+              {% elif d.aluno and d.aluno.avatar_tipo == 'lego-green' %}🦖
+              {% elif d.aluno and d.aluno.avatar_tipo == 'lego-orange' %}🏎️
+              {% elif d.aluno and d.aluno.avatar_tipo == 'lego-yellow' %}😀
+              {% else %}🤖{% endif %}
+            </div>
+            <div>
+              <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-main);">
+                {{ d.aluno.nome if d.aluno else d.nome_autor }}
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                <span>🏫 {{ d.turma.nome if d.turma else 'Geral' }}</span> &bull; 
+                <span>👥 {{ d.aluno.equipe if d.aluno else 'Equipe Lego' }}</span> &bull; 
+                <span>📅 {{ d.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.78rem; padding: 4px 8px; border-radius: 6px; font-weight: 700;">
+              🏷️ {{ d.categoria }}
+            </span>
+
+            {% if d.status == 'resolvida' %}
+              <span style="background: var(--lego-green-light); color: var(--lego-green-dark); padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">
+                🟢 Resolvida
+              </span>
+            {% elif d.status == 'respondida' %}
+              <span style="background: var(--lego-blue-light); color: var(--lego-blue-dark); padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">
+                💬 Respondida
+              </span>
+            {% else %}
+              <span style="background: var(--lego-yellow-light); color: var(--lego-yellow-dark); padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">
+                ⏳ Aguardando Resposta
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Conteúdo da Pergunta -->
+        <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">
+          {{ d.titulo }}
+        </h4>
+        <p style="font-size: 0.92rem; color: #334155; line-height: 1.5; margin-bottom: 16px; white-space: pre-line;">
+          {{ d.pergunta }}
+        </p>
+
+        <!-- Resposta do Professor (se houver) -->
+        {% if d.resposta_professor %}
+          <div style="background: #F0F7FF; border: 1.5px solid #BAE6FD; border-left: 5px solid var(--lego-blue); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-weight: 800; font-size: 0.88rem; color: var(--lego-blue-dark); display: flex; align-items: center; gap: 6px;">
+                🎓 <strong>Resposta Oficial do Professor</strong> ({{ d.respondido_por }})
+              </span>
+              {% if d.respondido_em %}
+                <span style="font-size: 0.75rem; color: var(--text-muted);">{{ d.respondido_em.strftime('%d/%m/%Y %H:%M') }}</span>
+              {% endif %}
+            </div>
+            <p style="font-size: 0.9rem; color: #1E293B; line-height: 1.45; white-space: pre-line;">
+              {{ d.resposta_professor }}
+            </p>
+          </div>
+        {% endif %}
+
+        <!-- Ações do Professor -->
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 10px;">
+          <button type="button" class="btn-lego btn-blue btn-sm" onclick="abrirModalResponderDuvida({{ d.id }}, '{{ d.titulo }}', '{{ d.resposta_professor }}')">
+            <span>💬</span> {% if d.resposta_professor %}Editar Resposta{% else %}Responder Dúvida{% endif %}
+          </button>
+          
+          {% if d.status != 'resolvida' and d.resposta_professor %}
+            <button type="button" class="btn-lego btn-green btn-sm" onclick="alterarStatusDuvida({{ d.id }}, 'resolvida')">
+              <span>✅</span> Marcar como Resolvida
+            </button>
+          {% endif %}
+
+          <button type="button" class="btn-lego btn-gray btn-sm" onclick="excluirDuvida({{ d.id }})" title="Excluir">
+            🗑️
+          </button>
+        </div>
+
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+
+<!-- MODAL: NOVA DÚVIDA -->
+<div id="modalNovaDuvida" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header" style="background: var(--lego-yellow-dark);">
+      <h3>❓ Postar Dúvida no Fórum Lego</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalNovaDuvida')">&times;</button>
+    </div>
+    <form onsubmit="salvarNovaDuvida(event)">
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Aluno / Equipe:</label>
+            <select name="aluno_id" class="input-lego" required>
+              {% for al in alunos %}
+                <option value="{{ al.id }}">{{ al.nome }} ({{ al.turma.codigo }} - {{ al.equipe }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Categoria da Dúvida:</label>
+            <select name="categoria" class="input-lego">
+              <option value="Programação & Sensores">🤖 Programação & Sensores</option>
+              <option value="Montagem / Mecânica">⚙️ Montagem & Mecânica (Engrenagens, Estrutura)</option>
+              <option value="Peças & Kits">📦 Peças & Kits Lego</option>
+              <option value="Geral">💡 Geral / Desafios</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Título da Pergunta:</label>
+            <input type="text" name="titulo" class="input-lego" placeholder="Ex: Dificuldade no sensor de distância ao girar 90 graus" required>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Detalhe a sua dúvida:</label>
+            <textarea name="pergunta" class="input-lego" rows="4" placeholder="Explique o que aconteceu, qual o comportamento esperado e o que o robô está fazendo de diferente..." required></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalNovaDuvida')">Cancelar</button>
+        <button type="submit" class="btn-lego btn-yellow">Publicar Dúvida</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- MODAL: RESPONDER DÚVIDA (PROFESSOR) -->
+<div id="modalResponderDuvida" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header" style="background: var(--lego-blue);">
+      <h3>💬 Resposta do Professor</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modalResponderDuvida')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 12px; font-weight: 600;">
+        Respondendo: <strong id="modalResponderTitulo"></strong>
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Nome do(a) Professor(a) / Monitor(a):</label>
+          <input type="text" id="modalResponderAutor" class="input-lego" value="Professor(a) de Robótica">
+        </div>
+
+        <div>
+          <label style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">Resposta e Orientações Técnicas:</label>
+          <textarea id="modalResponderTexto" class="input-lego" rows="5" placeholder="Escreva a orientação pedagógica passo a passo para a equipe..." required></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalResponderDuvida')">Cancelar</button>
+      <button type="button" class="btn-lego btn-blue" onclick="confirmarRespostaDuvida()">Enviar Resposta</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let duvidaSelecionadaId = null;
+
+  async function salvarNovaDuvida(e) {
+    e.preventDefault();
+    const form = e.target;
+    const aluno_id = form.aluno_id.value;
+    const categoria = form.categoria.value;
+    const titulo = form.titulo.value;
+    const pergunta = form.pergunta.value;
+
+    try {
+      const res = await fetch('/api/duvidas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ aluno_id, categoria, titulo, pergunta })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        closeModal('modalNovaDuvida');
+        setTimeout(() => location.reload(), 600);
+      } else {
+        showToast(data.error || 'Erro ao postar dúvida.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro ao comunicar com o servidor.', 'error');
+    }
+  }
+
+  function abrirModalResponderDuvida(id, titulo, respostaAtual) {
+    duvidaSelecionadaId = id;
+    document.getElementById('modalResponderTitulo').innerText = titulo;
+    document.getElementById('modalResponderTexto').value = respostaAtual || '';
+    openModal('modalResponderDuvida');
+  }
+
+  async function confirmarRespostaDuvida() {
+    if (!duvidaSelecionadaId) return;
+    const resposta = document.getElementById('modalResponderTexto').value;
+    const respondido_por = document.getElementById('modalResponderAutor').value;
+
+    if (!resposta.trim()) {
+      showToast('A resposta não pode ficar em branco.', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/duvidas/${duvidaSelecionadaId}/responder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resposta, respondido_por })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        closeModal('modalResponderDuvida');
+        setTimeout(() => location.reload(), 600);
+      } else {
+        showToast(data.error || 'Erro ao enviar resposta.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro ao comunicar com o servidor.', 'error');
+    }
+  }
+
+  async function alterarStatusDuvida(id, status) {
+    try {
+      const res = await fetch(`/api/duvidas/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        setTimeout(() => location.reload(), 600);
+      }
+    } catch (err) {
+      showToast('Erro ao atualizar status.', 'error');
+    }
+  }
+
+  async function excluirDuvida(id) {
+    if (!confirm('Deseja excluir esta dúvida do fórum?')) return;
+    try {
+      const res = await fetch(`/api/duvidas/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        setTimeout(() => location.reload(), 600);
+      }
+    } catch (err) {
+      showToast('Erro ao excluir dúvida.', 'error');
+    }
+  }
+</script>
+{% endblock %}

@@ -3,7 +3,7 @@ import csv
 import io
 from datetime import datetime, date
 from flask import Flask, render_template, request, jsonify, redirect, url_for, Response, flash
-from models import db, Turma, Aluno, SessaoChamada, RegistroPresenca, Medalha, ConquistaAluno, DiarioBordo
+from models import db, Turma, Aluno, SessaoChamada, RegistroPresenca, Medalha, ConquistaAluno, DiarioBordo, Atividade, EntregaAtividade, SlideAula, DuvidaAluno
 from database import init_db
 
 app = Flask(__name__)
@@ -34,6 +34,9 @@ def index():
     total_alunos = Aluno.query.filter_by(ativo=True).count()
     total_chamadas = SessaoChamada.query.count()
     total_anotacoes = DiarioBordo.query.count()
+    total_atividades = Atividade.query.count()
+    total_slides = SlideAula.query.count()
+    total_duvidas = DuvidaAluno.query.count()
     
     # Chamadas de hoje
     hoje = date.today()
@@ -46,14 +49,21 @@ def index():
     # Últimas anotações do diário de bordo
     ultimas_anotacoes = DiarioBordo.query.order_by(DiarioBordo.data.desc(), DiarioBordo.id.desc()).limit(3).all()
     
+    # Atividades ativas recentes
+    atividades_recentes = Atividade.query.filter_by(status='ativo').order_by(Atividade.id.desc()).limit(3).all()
+
     return render_template('index.html', 
                            turmas=turmas, 
                            total_alunos=total_alunos,
                            total_chamadas=total_chamadas,
                            total_anotacoes=total_anotacoes,
+                           total_atividades=total_atividades,
+                           total_slides=total_slides,
+                           total_duvidas=total_duvidas,
                            turmas_feitas_hoje=turmas_feitas_hoje,
                            top_alunos=top_alunos,
                            ultimas_anotacoes=ultimas_anotacoes,
+                           atividades_recentes=atividades_recentes,
                            hoje=hoje.strftime('%Y-%m-%d'),
                            hoje_formatado=hoje.strftime('%d/%m/%Y'))
 
@@ -72,6 +82,90 @@ def chamada():
                            data_atual=data_str)
 
 
+@app.route('/atividades')
+def atividades_page():
+    turmas = Turma.query.all()
+    turma_filtro = request.args.get('turma_id', type=int)
+    status_filtro = request.args.get('status', '')
+
+    query = Atividade.query
+    if turma_filtro:
+        query = query.filter((Atividade.turma_id == turma_filtro) | (Atividade.turma_id == None))
+    if status_filtro:
+        query = query.filter_by(status=status_filtro)
+
+    atividades = query.order_by(Atividade.id.desc()).all()
+    
+    # Todas as entregas para a aba de correção
+    entregas_query = EntregaAtividade.query
+    if turma_filtro:
+        entregas_query = entregas_query.join(Aluno).filter(Aluno.turma_id == turma_filtro)
+    entregas = entregas_query.order_by(EntregaAtividade.created_at.desc()).all()
+
+    # Todos os alunos para o formulário de entrega
+    alunos_query = Aluno.query.filter_by(ativo=True)
+    if turma_filtro:
+        alunos_query = alunos_query.filter_by(turma_id=turma_filtro)
+    alunos = alunos_query.order_by(Aluno.nome.asc()).all()
+
+    return render_template('activities.html',
+                           turmas=turmas,
+                           atividades=atividades,
+                           entregas=entregas,
+                           alunos=alunos,
+                           turma_filtro=turma_filtro,
+                           status_filtro=status_filtro,
+                           hoje=date.today().strftime('%Y-%m-%d'))
+
+
+@app.route('/slides')
+def slides_page():
+    turmas = Turma.query.all()
+    turma_filtro = request.args.get('turma_id', type=int)
+    tipo_filtro = request.args.get('tipo', '')
+
+    query = SlideAula.query
+    if turma_filtro:
+        query = query.filter((SlideAula.turma_id == turma_filtro) | (SlideAula.turma_id == None))
+    if tipo_filtro:
+        query = query.filter_by(tipo=tipo_filtro)
+
+    slides = query.order_by(SlideAula.numero_aula.asc(), SlideAula.id.asc()).all()
+
+    return render_template('slides.html',
+                           turmas=turmas,
+                           slides=slides,
+                           turma_filtro=turma_filtro,
+                           tipo_filtro=tipo_filtro)
+
+
+@app.route('/duvidas')
+def forum_page():
+    turmas = Turma.query.all()
+    turma_filtro = request.args.get('turma_id', type=int)
+    categoria_filtro = request.args.get('categoria', '')
+    status_filtro = request.args.get('status', '')
+
+    query = DuvidaAluno.query
+    if turma_filtro:
+        query = query.filter((DuvidaAluno.turma_id == turma_filtro) | (DuvidaAluno.turma_id == None))
+    if categoria_filtro:
+        query = query.filter_by(categoria=categoria_filtro)
+    if status_filtro:
+        query = query.filter_by(status=status_filtro)
+
+    duvidas = query.order_by(DuvidaAluno.created_at.desc()).all()
+    alunos = Aluno.query.filter_by(ativo=True).order_by(Aluno.nome.asc()).all()
+
+    return render_template('forum.html',
+                           turmas=turmas,
+                           duvidas=duvidas,
+                           alunos=alunos,
+                           turma_filtro=turma_filtro,
+                           categoria_filtro=categoria_filtro,
+                           status_filtro=status_filtro)
+
+
 @app.route('/anotacoes')
 def anotacoes_page():
     turmas = Turma.query.all()
@@ -86,7 +180,6 @@ def anotacoes_page():
 
     diarios = query.order_by(DiarioBordo.data.desc(), DiarioBordo.id.desc()).all()
     
-    # Anotações gerais de chamadas passadas
     query_sessoes = SessaoChamada.query
     if turma_filtro:
         query_sessoes = query_sessoes.filter_by(turma_id=turma_filtro)
@@ -97,7 +190,8 @@ def anotacoes_page():
                            diarios=diarios, 
                            sessoes_com_notas=sessoes_com_notas,
                            turma_filtro=turma_filtro,
-                           categoria_filtro=categoria_filtro)
+                           categoria_filtro=categoria_filtro,
+                           hoje=date.today().strftime('%Y-%m-%d'))
 
 
 @app.route('/alunos')
@@ -131,7 +225,6 @@ def gamificacao():
     ranking = query.order_by(Aluno.pontos_xp.desc()).all()
     medalhas = Medalha.query.all()
     
-    # Estatísticas de equipes
     equipes_stats = {}
     for a in Aluno.query.filter_by(ativo=True).all():
         eq = a.equipe or 'Geral'
@@ -176,7 +269,286 @@ def historico():
 
 
 # ==========================================
-# ROTAS DA API REST (JSON)
+# ROTAS DA API REST: ATIVIDADES & ENTREGAS
+# ==========================================
+
+@app.route('/api/atividades', methods=['GET', 'POST'])
+def api_atividades():
+    if request.method == 'GET':
+        atividades = Atividade.query.order_by(Atividade.id.desc()).all()
+        return jsonify([a.to_dict() for a in atividades])
+    
+    dados = request.get_json() or {}
+    if not dados.get('titulo') or not dados.get('descricao'):
+        return jsonify({'error': 'Título e Descrição são obrigatórios'}), 400
+
+    turma_id = dados.get('turma_id')
+    if turma_id and str(turma_id).strip() != '':
+        turma_id = int(turma_id)
+    else:
+        turma_id = None
+
+    data_limite_obj = None
+    if dados.get('data_limite'):
+        try:
+            data_limite_obj = datetime.strptime(dados.get('data_limite'), '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
+    nova = Atividade(
+        turma_id=turma_id,
+        titulo=dados.get('titulo').strip(),
+        descricao=dados.get('descricao').strip(),
+        kit_lego=dados.get('kit_lego', 'Lego SPIKE Prime').strip(),
+        xp_recompensa=int(dados.get('xp_recompensa', 50) or 50),
+        data_limite=data_limite_obj,
+        link_material=dados.get('link_material', '').strip(),
+        status=dados.get('status', 'ativo')
+    )
+    db.session.add(nova)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Desafio Lego cadastrado com sucesso!', 'atividade': nova.to_dict()})
+
+
+@app.route('/api/atividades/<int:atividade_id>', methods=['PUT', 'DELETE'])
+def api_atividade_detalhe(atividade_id):
+    atividade = db.session.get(Atividade, atividade_id)
+    if not atividade:
+        return jsonify({'error': 'Atividade não encontrada'}), 404
+
+    if request.method == 'DELETE':
+        db.session.delete(atividade)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Atividade excluída com sucesso!'})
+
+    dados = request.get_json() or {}
+    if 'titulo' in dados:
+        atividade.titulo = dados['titulo'].strip()
+    if 'descricao' in dados:
+        atividade.descricao = dados['descricao'].strip()
+    if 'kit_lego' in dados:
+        atividade.kit_lego = dados['kit_lego'].strip()
+    if 'xp_recompensa' in dados:
+        atividade.xp_recompensa = int(dados['xp_recompensa'])
+    if 'status' in dados:
+        atividade.status = dados['status']
+    if 'link_material' in dados:
+        atividade.link_material = dados['link_material'].strip()
+    if 'data_limite' in dados:
+        if dados['data_limite']:
+            try:
+                atividade.data_limite = datetime.strptime(dados['data_limite'], '%Y-%m-%d').date()
+            except ValueError:
+                pass
+        else:
+            atividade.data_limite = None
+
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Atividade atualizada com sucesso!', 'atividade': atividade.to_dict()})
+
+
+@app.route('/api/atividades/entregar', methods=['POST'])
+def api_entregar_atividade():
+    dados = request.get_json() or {}
+    atividade_id = dados.get('atividade_id')
+    aluno_id = dados.get('aluno_id')
+    
+    if not atividade_id or not aluno_id:
+        return jsonify({'error': 'Atividade e Aluno são obrigatórios'}), 400
+
+    atividade = db.session.get(Atividade, int(atividade_id))
+    aluno = db.session.get(Aluno, int(aluno_id))
+    if not atividade or not aluno:
+        return jsonify({'error': 'Atividade ou Aluno inválido'}), 404
+
+    entrega = EntregaAtividade(
+        atividade_id=atividade.id,
+        aluno_id=aluno.id,
+        equipe=dados.get('equipe', aluno.equipe),
+        descricao_solucao=dados.get('descricao_solucao', '').strip(),
+        link_foto_video=dados.get('link_foto_video', '').strip(),
+        arquivo_anexo=dados.get('arquivo_anexo', '').strip(),
+        status='pendente'
+    )
+    db.session.add(entrega)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Atividade enviada com sucesso! Aguarde a avaliação do professor.', 'entrega': entrega.to_dict()})
+
+
+@app.route('/api/entregas/<int:entrega_id>/avaliar', methods=['POST'])
+def api_avaliar_entrega(entrega_id):
+    entrega = db.session.get(EntregaAtividade, entrega_id)
+    if not entrega:
+        return jsonify({'error': 'Entrega não encontrada'}), 404
+
+    dados = request.get_json() or {}
+    novo_status = dados.get('status', 'aprovado') # aprovado, revisar
+    feedback = dados.get('feedback_professor', '').strip()
+    xp_a_conceder = int(dados.get('xp_concedido', entrega.atividade.xp_recompensa if entrega.atividade else 50))
+
+    aluno = db.session.get(Aluno, entrega.aluno_id)
+
+    # Se aprovado e antes não estava aprovado, concede o XP ao aluno!
+    if novo_status == 'aprovado' and entrega.status != 'aprovado':
+        if aluno:
+            aluno.pontos_xp += xp_a_conceder
+        entrega.xp_concedido = xp_a_conceder
+    elif novo_status != 'aprovado' and entrega.status == 'aprovado':
+        # Se revogou aprovação, remove o XP concedido
+        if aluno:
+            aluno.pontos_xp = max(0, aluno.pontos_xp - entrega.xp_concedido)
+        entrega.xp_concedido = 0
+
+    entrega.status = novo_status
+    entrega.feedback_professor = feedback
+    entrega.avaliado_em = datetime.now()
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': f'Entrega avaliada como "{novo_status.upper()}"! ({xp_a_conceder} XP creditados)' if novo_status == 'aprovado' else 'Entrega avaliada!',
+        'entrega': entrega.to_dict(),
+        'aluno_xp': aluno.pontos_xp if aluno else 0
+    })
+
+
+# ==========================================
+# ROTAS DA API REST: SLIDES & MATERIAIS
+# ==========================================
+
+@app.route('/api/slides', methods=['GET', 'POST'])
+def api_slides():
+    if request.method == 'GET':
+        slides = SlideAula.query.order_by(SlideAula.numero_aula.asc()).all()
+        return jsonify([s.to_dict() for s in slides])
+
+    dados = request.get_json() or {}
+    if not dados.get('titulo') or not dados.get('link_slide'):
+        return jsonify({'error': 'Título e Link do Slide/Material são obrigatórios'}), 400
+
+    turma_id = dados.get('turma_id')
+    if turma_id and str(turma_id).strip() != '':
+        turma_id = int(turma_id)
+    else:
+        turma_id = None
+
+    novo_slide = SlideAula(
+        turma_id=turma_id,
+        titulo=dados.get('titulo').strip(),
+        descricao=dados.get('descricao', '').strip(),
+        numero_aula=int(dados.get('numero_aula', 1) or 1),
+        link_slide=dados.get('link_slide').strip(),
+        tipo=dados.get('tipo', 'slides')
+    )
+    db.session.add(novo_slide)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Slide/Material adicionado com sucesso!', 'slide': novo_slide.to_dict()})
+
+
+@app.route('/api/slides/<int:slide_id>', methods=['DELETE'])
+def api_excluir_slide(slide_id):
+    slide = db.session.get(SlideAula, slide_id)
+    if not slide:
+        return jsonify({'error': 'Material não encontrado'}), 404
+
+    db.session.delete(slide)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Material excluído com sucesso!'})
+
+
+# ==========================================
+# ROTAS DA API REST: FÓRUM & DÚVIDAS
+# ==========================================
+
+@app.route('/api/duvidas', methods=['GET', 'POST'])
+def api_duvidas():
+    if request.method == 'GET':
+        duvidas = DuvidaAluno.query.order_by(DuvidaAluno.created_at.desc()).all()
+        return jsonify([d.to_dict() for d in duvidas])
+
+    dados = request.get_json() or {}
+    if not dados.get('titulo') or not dados.get('pergunta'):
+        return jsonify({'error': 'Título e Pergunta são obrigatórios'}), 400
+
+    turma_id = dados.get('turma_id')
+    if turma_id and str(turma_id).strip() != '':
+        turma_id = int(turma_id)
+    else:
+        turma_id = None
+
+    aluno_id = dados.get('aluno_id')
+    if aluno_id and str(aluno_id).strip() != '':
+        aluno_id = int(aluno_id)
+    else:
+        aluno_id = None
+
+    nova_duvida = DuvidaAluno(
+        turma_id=turma_id,
+        aluno_id=aluno_id,
+        nome_autor=dados.get('nome_autor', 'Aluno Construtor').strip(),
+        titulo=dados.get('titulo').strip(),
+        pergunta=dados.get('pergunta').strip(),
+        categoria=dados.get('categoria', 'Programação & Sensores'),
+        status='aberta'
+    )
+    db.session.add(nova_duvida)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Dúvida enviada com sucesso ao fórum!', 'duvida': nova_duvida.to_dict()})
+
+
+@app.route('/api/duvidas/<int:duvida_id>/responder', methods=['POST'])
+def api_responder_duvida(duvida_id):
+    duvida = db.session.get(DuvidaAluno, duvida_id)
+    if not duvida:
+        return jsonify({'error': 'Dúvida não encontrada'}), 404
+
+    dados = request.get_json() or {}
+    resposta = dados.get('resposta', '').strip()
+    respondido_por = dados.get('respondido_por', 'Professor(a) de Robótica').strip()
+
+    if not resposta:
+        return jsonify({'error': 'Resposta não pode ser vazia'}), 400
+
+    duvida.resposta_professor = resposta
+    duvida.respondido_por = respondido_por
+    duvida.status = 'respondida'
+    duvida.respondido_em = datetime.now()
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Resposta enviada com sucesso!', 'duvida': duvida.to_dict()})
+
+
+@app.route('/api/duvidas/<int:duvida_id>/status', methods=['PUT'])
+def api_status_duvida(duvida_id):
+    duvida = db.session.get(DuvidaAluno, duvida_id)
+    if not duvida:
+        return jsonify({'error': 'Dúvida não encontrada'}), 404
+
+    dados = request.get_json() or {}
+    novo_status = dados.get('status', 'resolvida')
+    duvida.status = novo_status
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': f'Status alterado para {novo_status}!', 'duvida': duvida.to_dict()})
+
+
+@app.route('/api/duvidas/<int:duvida_id>', methods=['DELETE'])
+def api_excluir_duvida(duvida_id):
+    duvida = db.session.get(DuvidaAluno, duvida_id)
+    if not duvida:
+        return jsonify({'error': 'Dúvida não encontrada'}), 404
+
+    db.session.delete(duvida)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Dúvida excluída com sucesso!'})
+
+
+# ==========================================
+# ROTAS DA API REST: TURMAS, DIÁRIO, ALUNOS
 # ==========================================
 
 @app.route('/api/turmas', methods=['GET'])
@@ -368,7 +740,6 @@ def api_salvar_chamada():
                 'nivel': aluno.info_nivel
             })
 
-            # Verifica conquista automática: "Frequência de Ouro" (5 ou mais presenças)
             total_presencas = sum(1 for r in aluno.registros if r.status == 'presente')
             if total_presencas >= 5:
                 med_freq = Medalha.query.filter_by(codigo="super_frequencia").first()
@@ -585,7 +956,7 @@ def exportar_csv():
 
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("SISTEMA DE CHAMADA & GAMIFICACAO LEGO INICIADO COM SUCESSO!")
+    print("SISTEMA DE ROBOTICA & CHAMADA LEGO INICIADO COM SUCESSO!")
     print("Acesse no navegador: http://127.0.0.1:5000")
     print("="*60 + "\n")
     app.run(debug=True, host='0.0.0.0', port=5000)

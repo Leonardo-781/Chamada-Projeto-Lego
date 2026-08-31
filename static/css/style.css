@@ -727,6 +727,17 @@ body {
   100% { transform: translateX(0); opacity: 1; }
 }
 
+/* Tabs */
+.btn-tab-view {
+  border-radius: 8px;
+  font-weight: 800;
+  transition: all 0.2s ease;
+}
+.btn-tab-view.active {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
 /* Footer */
 .lego-footer {
   background: #1E293B;
