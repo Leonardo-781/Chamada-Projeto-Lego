@@ -106,6 +106,38 @@ class LegoSystemTestCase(unittest.TestCase):
             self.assertEqual(res_stat.status_code, 200)
             print("[OK] Verificacao: Ciclo completo do Fórum de Dúvidas (Pergunta, Resposta e Resolução) validado!")
 
+    def test_portal_do_aluno_e_login(self):
+        with app.app_context():
+            aluno = Aluno.query.first()
+            
+            # 1. Teste de login com PIN errado
+            res_err = self.client.post('/aluno/login', json={
+                'aluno_id': aluno.id,
+                'pin': '9999'
+            })
+            self.assertEqual(res_err.status_code, 401)
+
+            # 2. Teste de login com PIN correto (padrão 1234)
+            res_ok = self.client.post('/aluno/login', json={
+                'aluno_id': aluno.id,
+                'pin': '1234'
+            })
+            self.assertEqual(res_ok.status_code, 200)
+            self.assertTrue(res_ok.get_json()['success'])
+
+            # 3. Acesso à página de estudos logado
+            res_estudos = self.client.get('/estudos')
+            self.assertEqual(res_estudos.status_code, 200)
+            self.assertIn(aluno.nome.encode('utf-8'), res_estudos.data)
+
+            # 4. Alteração de PIN
+            res_pin = self.client.put('/api/aluno/alterar-pin', json={'novo_pin': '5678'})
+            self.assertEqual(res_pin.status_code, 200)
+
+            aluno_atualizado = db.session.get(Aluno, aluno.id)
+            self.assertEqual(aluno_atualizado.pin_acesso, '5678')
+            print(f"[OK] Verificacao: Login do Aluno ({aluno.nome}), acesso aos estudos remotos e troca de PIN validados!")
+
     def test_todas_as_rotas_web(self):
         rotas = [
             '/',
@@ -117,6 +149,7 @@ class LegoSystemTestCase(unittest.TestCase):
             '/alunos',
             '/gamificacao',
             '/historico',
+            '/aluno/login',
             '/exportar-csv'
         ]
         for r in rotas:

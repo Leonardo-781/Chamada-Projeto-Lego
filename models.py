@@ -51,6 +51,7 @@ class Aluno(db.Model):
     equipe = db.Column(db.String(50), default='Construtores')
     avatar_tipo = db.Column(db.String(50), default='lego-red')
     pontos_xp = db.Column(db.Integer, default=0)
+    pin_acesso = db.Column(db.String(10), default='1234')
     ativo = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=utc_now)
 
@@ -146,7 +147,8 @@ class Aluno(db.Model):
             'porcentagem_presenca': stats['porcentagem'],
             'total_chamadas': stats['total'],
             'medalhas_count': len(self.conquistas),
-            'entregas_count': len(self.entregas)
+            'entregas_count': len(self.entregas),
+            'pin_acesso': self.pin_acesso or '1234'
         }
 
 

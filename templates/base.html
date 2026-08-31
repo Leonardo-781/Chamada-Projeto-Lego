@@ -4,21 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Portal de Robótica Lego{% endblock %}</title>
-  <!-- Estilos Temáticos Lego -->
+  <!-- Estilos Temáticos Lego High-Tech -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-  <!-- Top Lego Header com Studs -->
+  <!-- Top Lego Header com Studs e Arena Timer -->
   <header class="lego-header">
     <nav class="navbar">
       <a href="{{ url_for('index') }}" class="brand">
         <div class="brand-icon">🧱</div>
         <div class="brand-text">
           <h1>Lego Robotics Hub</h1>
-          <p>Portal Pedagógico & Controle de Frequência</p>
+          <p>Portal STEM & Laboratório de Robótica</p>
         </div>
       </a>
+
+      <!-- Arena Mission Timer (2m30s) para Bancada -->
+      <div class="arena-timer-box" style="display: flex; align-items: center; gap: 8px; background: rgba(15, 23, 42, 0.6); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+        <span style="font-size: 0.8rem; font-weight: 800; color: #F59E0B; text-transform: uppercase;">⏱️ Arena:</span>
+        <span id="arenaTimerDisplay" style="font-family: 'Courier New', monospace; font-size: 1.15rem; font-weight: 900; color: #FFFFFF; min-width: 54px;">02:30</span>
+        <div style="display: flex; gap: 4px;">
+          <button type="button" class="timer-btn" id="timerStartBtn" onclick="toggleArenaTimer()" title="Iniciar / Pausar">▶️</button>
+          <button type="button" class="timer-btn" onclick="resetArenaTimer()" title="Reiniciar (2m30s)">🔄</button>
+        </div>
+      </div>
 
       <ul class="nav-links">
         <li>
@@ -66,6 +76,11 @@
             <span>📊</span> Histórico
           </a>
         </li>
+        <li>
+          <a href="{{ url_for('estudos_page') }}" class="nav-link nav-student-highlight {% if request.path.startswith('/estudos') or request.path.startswith('/aluno') %}active{% endif %}" style="background: rgba(245, 158, 11, 0.25); border: 1px solid #F59E0B; color: #FEF3C7; font-weight: 800;">
+            <span>🎓</span> Área do Aluno
+          </a>
+        </li>
       </ul>
     </nav>
   </header>
@@ -82,6 +97,65 @@
 
   <!-- Scripts -->
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    // Arena Mission Timer (2m30s)
+    let timerSeconds = 150;
+    let timerInterval = null;
+    let timerRunning = false;
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      const display = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const el = document.getElementById('arenaTimerDisplay');
+      if (el) {
+        el.innerText = display;
+        if (timerSeconds <= 30 && timerSeconds > 0) {
+          el.style.color = '#EF4444'; // Vermelho alerta
+        } else if (timerSeconds === 0) {
+          el.style.color = '#EF4444';
+          el.innerText = "TEMPO!";
+        } else {
+          el.style.color = '#FFFFFF';
+        }
+      }
+    }
+
+    function toggleArenaTimer() {
+      const btn = document.getElementById('timerStartBtn');
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        if (btn) btn.innerText = '▶️';
+      } else {
+        if (timerSeconds === 0) timerSeconds = 150;
+        timerRunning = true;
+        if (btn) btn.innerText = '⏸️';
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            if (btn) btn.innerText = '▶️';
+            if (typeof showToast === 'function') {
+              showToast('⏰ Fim do tempo de missão da Arena!', 'error');
+            }
+          }
+        }, 1000);
+      }
+    }
+
+    function resetArenaTimer() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerSeconds = 150;
+      const btn = document.getElementById('timerStartBtn');
+      if (btn) btn.innerText = '▶️';
+      updateTimerDisplay();
+    }
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

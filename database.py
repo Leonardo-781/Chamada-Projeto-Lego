@@ -26,6 +26,12 @@ def migrar_colunas(app):
                 if 'proxima_aula' not in colunas_sess:
                     conn.execute(text("ALTER TABLE sessoes_chamada ADD COLUMN proxima_aula TEXT DEFAULT ''"))
                     conn.commit()
+
+                res_alunos = conn.execute(text("PRAGMA table_info(alunos)")).fetchall()
+                colunas_alunos = [r[1] for r in res_alunos]
+                if 'pin_acesso' not in colunas_alunos:
+                    conn.execute(text("ALTER TABLE alunos ADD COLUMN pin_acesso TEXT DEFAULT '1234'"))
+                    conn.commit()
     except Exception as e:
         print(f"Aviso de migracao: {e}")
 

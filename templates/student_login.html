@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Login do Aluno - Portal de Estudos Lego{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 480px; margin: 40px auto;">
+  <div class="lego-card" style="padding: 0; overflow: hidden; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);">
+    
+    <!-- Top Header High-Tech -->
+    <div style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); padding: 28px 24px; text-align: center; border-bottom: 2px solid var(--lego-yellow);">
+      <div style="font-size: 3rem; margin-bottom: 8px; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.5));">
+        🤖
+      </div>
+      <h2 style="font-size: 1.45rem; font-weight: 800; color: #F8FAFC; letter-spacing: 0.5px;">
+        ÁREA DE ESTUDOS DO ALUNO
+      </h2>
+      <p style="font-size: 0.85rem; color: #94A3B8; margin-top: 4px; font-weight: 600;">
+        Acesse seus slides, desafios de montagem e tire dúvidas de casa
+      </p>
+    </div>
+
+    <!-- Formulário de Acesso -->
+    <div style="padding: 24px; background: #111827;">
+      <form onsubmit="realizarLoginAluno(event)">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          
+          <!-- 1. Selecionar Turma -->
+          <div>
+            <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">
+              1. Selecione sua Turma:
+            </label>
+            <select id="loginTurmaSelect" class="input-lego" onchange="filtrarAlunosPorTurma()" required style="background: #1F2937; border-color: #374151; color: #F9FAFB;">
+              <option value="">-- Escolha sua Turma --</option>
+              {% for t in turmas %}
+                <option value="{{ t.id }}">{{ t.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- 2. Selecionar Nome do Aluno -->
+          <div>
+            <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">
+              2. Selecione seu Nome:
+            </label>
+            <select id="loginAlunoSelect" name="aluno_id" class="input-lego" required style="background: #1F2937; border-color: #374151; color: #F9FAFB;">
+              <option value="">-- Primeiro escolha a turma acima --</option>
+              {% for a in alunos %}
+                <option value="{{ a.id }}" data-turma="{{ a.turma_id }}" style="display: none;">
+                  {{ a.nome }} ({{ a.equipe }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- 3. PIN de Segurança -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; text-transform: uppercase; letter-spacing: 0.5px;">
+                3. Digite seu PIN de Acesso (4 Dígitos):
+              </label>
+            </div>
+            <input type="password" id="loginPinInput" name="pin" class="input-lego" placeholder="••••" maxlength="8" required style="background: #1F2937; border-color: #374151; color: #F9FAFB; font-size: 1.2rem; letter-spacing: 4px; text-align: center;">
+            <p style="font-size: 0.75rem; color: #94A3B8; margin-top: 6px;">
+              💡 <em>PIN padrão de primeiro acesso: <strong>1234</strong> (consulte seu professor se esqueceu).</em>
+            </p>
+          </div>
+
+          <!-- Botão de Entrar -->
+          <div style="margin-top: 8px;">
+            <button type="submit" class="btn-lego btn-yellow" style="width: 100%; padding: 14px; font-size: 1rem; font-weight: 800; justify-content: center; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);">
+              <span>🚀</span> Entrar no Portal de Estudos
+            </button>
+          </div>
+
+          <!-- Link de Retorno -->
+          <div style="text-align: center; margin-top: 10px;">
+            <a href="{{ url_for('index') }}" style="color: #94A3B8; font-size: 0.82rem; font-weight: 600; text-decoration: none;">
+              &larr; Voltar para o Painel do Laboratório
+            </a>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function filtrarAlunosPorTurma() {
+    const turmaId = document.getElementById('loginTurmaSelect').value;
+    const alunoSelect = document.getElementById('loginAlunoSelect');
+    const options = alunoSelect.querySelectorAll('option[data-turma]');
+
+    alunoSelect.value = '';
+    let visibleCount = 0;
+
+    options.forEach(opt => {
+      if (!turmaId || opt.getAttribute('data-turma') === turmaId) {
+        opt.style.display = 'block';
+        visibleCount++;
+      } else {
+        opt.style.display = 'none';
+      }
+    });
+
+    if (visibleCount > 0) {
+      alunoSelect.options[0].text = '-- Selecione seu nome da lista --';
+    } else {
+      alunoSelect.options[0].text = '-- Nenhum aluno encontrado nesta turma --';
+    }
+  }
+
+  async function realizarLoginAluno(e) {
+    e.preventDefault();
+    const aluno_id = document.getElementById('loginAlunoSelect').value;
+    const pin = document.getElementById('loginPinInput').value;
+
+    if (!aluno_id) {
+      showToast('Por favor, selecione seu nome.', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch('/aluno/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ aluno_id, pin })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        setTimeout(() => {
+          window.location.href = data.redirect || '/estudos';
+        }, 500);
+      } else {
+        showToast(data.error || 'Erro ao realizar login.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro de comunicação com o servidor.', 'error');
+    }
+  }
+</script>
+{% endblock %}

@@ -2,7 +2,7 @@ import os
 import csv
 import io
 from datetime import datetime, date
-from flask import Flask, render_template, request, jsonify, redirect, url_for, Response, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for, Response, flash, session
 from models import db, Turma, Aluno, SessaoChamada, RegistroPresenca, Medalha, ConquistaAluno, DiarioBordo, Atividade, EntregaAtividade, SlideAula, DuvidaAluno
 from database import init_db
 
@@ -164,6 +164,111 @@ def forum_page():
                            turma_filtro=turma_filtro,
                            categoria_filtro=categoria_filtro,
                            status_filtro=status_filtro)
+
+
+# ==========================================
+# ROTAS DO PORTAL DO ALUNO (ESTUDOS REMOTOS)
+# ==========================================
+
+@app.route('/estudos')
+def estudos_page():
+    aluno_id = session.get('aluno_id')
+    if not aluno_id:
+        return redirect(url_for('aluno_login'))
+    
+    aluno = db.session.get(Aluno, aluno_id)
+    if not aluno or not aluno.ativo:
+        session.pop('aluno_id', None)
+        return redirect(url_for('aluno_login'))
+    
+    # Slides e materiais didáticos da turma do aluno ou gerais
+    slides = SlideAula.query.filter(
+        (SlideAula.turma_id == aluno.turma_id) | (SlideAula.turma_id == None)
+    ).order_by(SlideAula.numero_aula.asc()).all()
+
+    # Atividades e desafios ativos
+    atividades = Atividade.query.filter(
+        (Atividade.turma_id == aluno.turma_id) | (Atividade.turma_id == None)
+    ).filter_by(status='ativo').order_by(Atividade.id.desc()).all()
+
+    # Entregas feitas pelo próprio aluno
+    minhas_entregas = EntregaAtividade.query.filter_by(aluno_id=aluno.id).order_by(EntregaAtividade.created_at.desc()).all()
+    entregas_dict = {e.atividade_id: e for e in minhas_entregas}
+
+    # Minhas dúvidas e respostas
+    minhas_duvidas = DuvidaAluno.query.filter_by(aluno_id=aluno.id).order_by(DuvidaAluno.created_at.desc()).all()
+
+    # Medalhas do aluno
+    conquistas = ConquistaAluno.query.filter_by(aluno_id=aluno.id).all()
+
+    return render_template('student_portal.html',
+                           aluno=aluno,
+                           slides=slides,
+                           atividades=atividades,
+                           minhas_entregas=minhas_entregas,
+                           entregas_dict=entregas_dict,
+                           minhas_duvidas=minhas_duvidas,
+                           conquistas=conquistas,
+                           hoje=date.today().strftime('%Y-%m-%d'))
+
+
+@app.route('/aluno/login', methods=['GET', 'POST'])
+def aluno_login():
+    if request.method == 'GET':
+        if session.get('aluno_id'):
+            return redirect(url_for('estudos_page'))
+        turmas = Turma.query.all()
+        alunos = Aluno.query.filter_by(ativo=True).order_by(Aluno.nome.asc()).all()
+        return render_template('student_login.html', turmas=turmas, alunos=alunos)
+
+    dados = request.get_json() or {}
+    aluno_id = dados.get('aluno_id')
+    pin = str(dados.get('pin', '')).strip()
+
+    if not aluno_id or not pin:
+        return jsonify({'error': 'Selecione seu nome e digite seu PIN de acesso'}), 400
+
+    aluno = db.session.get(Aluno, int(aluno_id))
+    if not aluno or not aluno.ativo:
+        return jsonify({'error': 'Aluno não encontrado'}), 404
+
+    # Validação do PIN (padrão '1234' se vazio)
+    pin_correto = aluno.pin_acesso or '1234'
+    if pin != pin_correto:
+        return jsonify({'error': 'PIN incorreto! Solicite ajuda ao seu professor.'}), 401
+
+    session['aluno_id'] = aluno.id
+    return jsonify({
+        'success': True,
+        'message': f'Olá, {aluno.nome}! Acesso liberado.',
+        'redirect': url_for('estudos_page')
+    })
+
+
+@app.route('/aluno/logout')
+def aluno_logout():
+    session.pop('aluno_id', None)
+    return redirect(url_for('aluno_login'))
+
+
+@app.route('/api/aluno/alterar-pin', methods=['PUT'])
+def api_aluno_alterar_pin():
+    aluno_id = session.get('aluno_id')
+    if not aluno_id:
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    aluno = db.session.get(Aluno, aluno_id)
+    if not aluno:
+        return jsonify({'error': 'Aluno não encontrado'}), 404
+
+    dados = request.get_json() or {}
+    novo_pin = str(dados.get('novo_pin', '')).strip()
+    if len(novo_pin) < 4 or len(novo_pin) > 8:
+        return jsonify({'error': 'O PIN deve conter entre 4 e 8 dígitos'}), 400
+
+    aluno.pin_acesso = novo_pin
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'PIN de segurança atualizado com sucesso!'})
 
 
 @app.route('/anotacoes')
