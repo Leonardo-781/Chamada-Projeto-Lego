@@ -1,6 +1,6 @@
 /* =========================================================
    MONTE BOT & UFU - DESIGN SYSTEM INSTITUCIONAL STEM
-   Moderno, Limpo, Amigável e Profissional
+   Moderno, Limpo, Amigável, Equilibrado e de Alta Legibilidade
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
@@ -57,7 +57,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6, .brand-title, .stat-number, .btn-lego {
+h1, h2, h3, h4, h5, h6, .brand-title, .stat-number, .btn-lego, .student-info-name, .class-title {
   font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
   letter-spacing: -0.02em;
   color: var(--text-main);
@@ -216,6 +216,7 @@ body {
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
+  margin-bottom: 20px;
 }
 
 .lego-card:hover {
@@ -249,7 +250,7 @@ body {
   background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
   border: 1px solid #334155;
   border-radius: var(--radius-lg);
-  padding: 28px;
+  padding: 26px 28px;
   color: #FFFFFF;
   margin-bottom: 28px;
   box-shadow: var(--shadow-md);
@@ -262,7 +263,7 @@ body {
 }
 
 .hero-banner p {
-  color: #94A3B8;
+  color: #CBD5E1;
   font-size: 0.9rem;
 }
 
@@ -372,6 +373,12 @@ body {
   padding: 12px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ==========================================
@@ -487,6 +494,177 @@ body {
 }
 
 /* ==========================================
+   CHAMADA & CARDS DE ALUNOS (ATTENDANCE)
+   ========================================== */
+
+.attendance-header-bar {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 18px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.turma-selector-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.turma-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 700;
+  background: var(--bg-subtle);
+  color: var(--text-body);
+  border: 1px solid var(--border-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.turma-tab:hover {
+  background: #E2E8F0;
+  color: var(--text-main);
+}
+
+.turma-tab.active {
+  background: var(--color-blue);
+  color: #FFFFFF;
+  border-color: var(--color-blue);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.students-call-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.student-call-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.15s ease;
+}
+
+.student-call-card.status-presente {
+  border-left: 4px solid var(--color-green);
+}
+
+.student-call-card.status-falta {
+  border-left: 4px solid var(--color-red);
+}
+
+.student-call-card.status-justificada {
+  border-left: 4px solid var(--color-amber);
+}
+
+.student-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.student-info-name {
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.student-team-tag {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.student-xp-pill {
+  background: var(--color-amber-subtle);
+  color: var(--color-amber);
+  border: 1px solid #FDE68A;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-buttons-group {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.btn-status {
+  flex: 1;
+  padding: 7px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  background: var(--bg-subtle);
+  color: var(--text-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-status:hover {
+  background: #E2E8F0;
+}
+
+.btn-status.btn-pres.active {
+  background: var(--color-green);
+  color: white;
+  border-color: var(--color-green);
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+}
+
+.btn-status.btn-falt.active {
+  background: var(--color-red);
+  color: white;
+  border-color: var(--color-red);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+}
+
+.btn-status.btn-just.active {
+  background: var(--color-amber);
+  color: white;
+  border-color: var(--color-amber);
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
+}
+
+.student-bonus-drawer {
+  background: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-top: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 0.78rem;
+}
+
+/* ==========================================
    TABELAS (CLARAS, LIMPAS & PROFISSIONAIS)
    ========================================== */
 
@@ -542,6 +720,82 @@ body {
 }
 
 /* ==========================================
+   MODAIS (MODERNOS & LIMPOS)
+   ========================================== */
+
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-backdrop.show {
+  display: flex;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  max-width: 520px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: modalPop 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+  padding: 18px 24px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: var(--text-main);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ==========================================
    TIMER DE ARENA (2m30s)
    ========================================== */
 
@@ -571,6 +825,23 @@ body {
 }
 
 /* ==========================================
+   AVATARS & EMOJIS
+   ========================================== */
+
+.avatar-lego {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  flex-shrink: 0;
+}
+
+/* ==========================================
    RESPONSIVIDADE
    ========================================== */
 
@@ -582,4 +853,5 @@ body {
   .navbar { flex-direction: column; align-items: stretch; }
   .nav-links { justify-content: center; }
   .stats-grid { grid-template-columns: 1fr; }
+  .attendance-header-bar { flex-direction: column; align-items: stretch; }
 }
