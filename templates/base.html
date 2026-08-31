@@ -9,34 +9,41 @@
 </head>
 <body>
 
-  <!-- Barra Superior Institucional com Logos UFU, FACOM, LINA, MONTE BOT -->
-  <div style="background: #FFFFFF; border-bottom: 2px solid #2563EB; padding: 6px 20px;">
-    <div style="max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-      <div style="display: flex; align-items: center; gap: 14px;">
-        <img src="{{ url_for('static', filename='img/logos_institucionais.jpg') }}" alt="UFU | FACOM | LINA | MONTE BOT" style="max-height: 38px; object-fit: contain;">
+  <!-- Barra Superior Institucional com Logos e Perfil de Acesso -->
+  <div style="background: #0B0F19; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 8px 20px;">
+    <div style="max-width: 1320px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      
+      <!-- Logos Institucionais em Pill Estilizado -->
+      <div style="background: #FFFFFF; padding: 4px 14px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center;">
+        <img src="{{ url_for('static', filename='img/logos_institucionais.jpg') }}" alt="UFU | FACOM | LINA | MONTE BOT" style="max-height: 30px; object-fit: contain;">
       </div>
 
-      <div style="display: flex; align-items: center; gap: 12px; font-size: 0.82rem;">
+      <!-- Indicador de Usuário Logado -->
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 0.8rem;">
         {% if current_user %}
           {% if current_user.is_admin %}
-            <span style="background: #D97706; color: white; padding: 3px 10px; border-radius: 12px; font-weight: 800;">
-              👑 Responsável (Admin Master)
+            <span style="background: rgba(217, 119, 6, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #FBBF24; padding: 3px 10px; border-radius: 20px; font-weight: 800;">
+              👑 Coordenação UFU (Master)
             </span>
           {% else %}
-            <span style="background: #059669; color: white; padding: 3px 10px; border-radius: 12px; font-weight: 800;">
-              👨‍🏫 Professor Escola (Acompanhamento)
+            <span style="background: rgba(5, 150, 105, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34D399; padding: 3px 10px; border-radius: 20px; font-weight: 800;">
+              👨‍🏫 {{ current_user.escola }} (Acompanhamento)
             </span>
           {% endif %}
-          <span style="color: #475569; font-weight: 700;">{{ current_user.nome }}</span>
-          <a href="{{ url_for('logout') }}" style="color: #EF4444; text-decoration: none; font-weight: 800; margin-left: 6px;">[Sair]</a>
+          <span style="color: #CBD5E1; font-weight: 700;">{{ current_user.nome }}</span>
+          <a href="{{ url_for('logout') }}" style="color: #F87171; text-decoration: none; font-weight: 800; padding: 2px 8px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+            Sair
+          </a>
         {% elif current_aluno %}
-          <span style="background: #2563EB; color: white; padding: 3px 10px; border-radius: 12px; font-weight: 800;">
-            🎓 Aluno: {{ current_aluno.nome }}
+          <span style="background: rgba(37, 99, 235, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); color: #38BDF8; padding: 3px 10px; border-radius: 20px; font-weight: 800;">
+            🎓 {{ current_aluno.nome }} &bull; {{ current_aluno.equipe }}
           </span>
-          <a href="{{ url_for('logout') }}" style="color: #EF4444; text-decoration: none; font-weight: 800; margin-left: 6px;">[Sair]</a>
+          <a href="{{ url_for('logout') }}" style="color: #F87171; text-decoration: none; font-weight: 800; padding: 2px 8px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+            Sair
+          </a>
         {% else %}
           <a href="{{ url_for('login_page') }}" style="background: #2563EB; color: white; padding: 4px 12px; border-radius: 6px; text-decoration: none; font-weight: 800;">
-            🔐 Fazer Login
+            🔐 Entrar no Sistema
           </a>
         {% endif %}
       </div>

@@ -7,147 +7,228 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <style>
     body {
-      background: #0B0F19;
+      background: #090D16;
+      background-image: 
+        radial-gradient(circle at 50% -10%, rgba(37, 99, 235, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
       color: #F8FAFC;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
-    .login-container {
+
+    .login-wrapper {
       max-width: 520px;
       margin: 40px auto;
       width: 100%;
       padding: 0 16px;
     }
-    .institutional-banner {
+
+    /* Card de Logos Institucionais */
+    .logos-card {
       background: #FFFFFF;
-      border-radius: 12px 12px 0 0;
-      padding: 16px 20px;
-      text-align: center;
-      border-bottom: 3px solid #2563EB;
+      border-radius: 16px 16px 0 0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      border-bottom: 2px solid #2563EB;
     }
-    .institutional-banner img {
-      max-height: 52px;
+
+    .logos-card img {
+      max-height: 48px;
       max-width: 100%;
       object-fit: contain;
     }
-    .login-card {
-      background: #111827;
-      border: 1px solid #334155;
+
+    /* Card Principal */
+    .login-main-card {
+      background: rgba(21, 30, 46, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-top: none;
-      border-radius: 0 0 12px 12px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
       overflow: hidden;
     }
-    .login-nav-tabs {
+
+    /* Segmented Control / Tabs */
+    .segmented-control {
       display: flex;
-      background: #0F172A;
-      border-bottom: 1px solid #1E293B;
+      background: #0B0F19;
+      padding: 6px;
+      gap: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .login-tab-btn {
+
+    .segment-btn {
       flex: 1;
-      padding: 14px 8px;
+      padding: 10px 8px;
       background: transparent;
       border: none;
+      border-radius: 8px;
       color: #94A3B8;
       font-size: 0.82rem;
       font-weight: 700;
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s ease;
-      text-align: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
-    .login-tab-btn.active {
+
+    .segment-btn:hover {
+      color: #F8FAFC;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .segment-btn.active {
+      background: #1E293B;
       color: #38BDF8;
-      background: #111827;
-      border-bottom: 2px solid #38BDF8;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(56, 189, 248, 0.25);
     }
-    .form-section {
+
+    .form-body {
       padding: 24px;
     }
-    .input-field {
+
+    .input-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #CBD5E1;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .custom-input {
       width: 100%;
-      padding: 11px 14px;
-      background: #1F2937;
-      border: 1px solid #374151;
+      padding: 12px 14px;
+      background: #0B0F19;
+      border: 1px solid #1F2937;
       border-radius: 8px;
-      color: #F9FAFB;
+      color: #F8FAFC;
       font-size: 0.92rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: all 0.2s ease;
     }
-    .input-field:focus {
+
+    .custom-input:focus {
       border-color: #38BDF8;
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      background: #0F172A;
     }
-    .btn-submit {
+
+    .submit-btn {
       width: 100%;
-      padding: 12px;
+      padding: 13px;
       border-radius: 8px;
-      font-weight: 800;
       font-size: 0.95rem;
+      font-weight: 800;
       border: none;
       cursor: pointer;
-      transition: transform 0.15s ease, background-color 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      transition: all 0.2s ease;
     }
-    .btn-submit:active { transform: scale(0.98); }
-    .btn-blue-primary { background: #2563EB; color: white; }
-    .btn-blue-primary:hover { background: #1D4ED8; }
-    .btn-emerald-primary { background: #059669; color: white; }
-    .btn-emerald-primary:hover { background: #047857; }
-    .btn-amber-primary { background: #D97706; color: white; }
-    .btn-amber-primary { background: #B45309; }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-aluno-style {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+    .btn-aluno-style:hover {
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    }
+
+    .btn-prof-style {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+    }
+    .btn-prof-style:hover {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    }
+
+    .btn-admin-style {
+      background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+    }
+    .btn-admin-style:hover {
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    }
+
+    .demo-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      color: #94A3B8;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .demo-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #F8FAFC;
+    }
   </style>
 </head>
 <body>
 
-  <div class="login-container">
+  <div class="login-wrapper">
     
-    <!-- Logos Institucionais Oficiais -->
-    <div class="institutional-banner">
+    <!-- Top Logos Card -->
+    <div class="logos-card">
       <img src="{{ url_for('static', filename='img/logos_institucionais.jpg') }}" alt="UFU | FACOM | LINA | MONTE BOT">
     </div>
 
-    <!-- Card de Acesso Multi-Perfil -->
-    <div class="login-card">
+    <!-- Main Login Card -->
+    <div class="login-main-card">
       
-      <div style="padding: 18px 24px; background: #0F172A; text-align: center; border-bottom: 1px solid #1E293B;">
-        <h2 style="font-size: 1.15rem; font-weight: 800; color: #F1F5F9; letter-spacing: 0.3px;">
-          PLATAFORMA DE ROBÓTICA & ENGENHARIA
+      <div style="padding: 20px 24px 16px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+        <h2 style="font-size: 1.2rem; font-weight: 800; color: #F8FAFC; letter-spacing: -0.01em;">
+          Laboratório de Robótica & Inteligência Artificial
         </h2>
-        <p style="font-size: 0.78rem; color: #94A3B8; margin-top: 2px;">
-          UFU &bull; FACOM &bull; Laboratório LINA &bull; Projeto MONTE BOT
+        <p style="font-size: 0.8rem; color: #94A3B8; margin-top: 2px;">
+          Universidade Federal de Uberlândia &bull; Projeto MONTE BOT
         </p>
       </div>
 
-      <!-- Abas dos 3 Perfis de Usuário -->
-      <div class="login-nav-tabs">
-        <button type="button" class="login-tab-btn active" id="tabBtnAluno" onclick="switchLoginTab('aluno')">
-          🎓 Aluno
+      <!-- Segmented Tabs -->
+      <div class="segmented-control">
+        <button type="button" class="segment-btn active" id="tabBtnAluno" onclick="switchLoginTab('aluno')">
+          <span>🎓</span> Aluno
         </button>
-        <button type="button" class="login-tab-btn" id="tabBtnProfessor" onclick="switchLoginTab('professor')">
-          👨‍🏫 Professor Escola
+        <button type="button" class="segment-btn" id="tabBtnProfessor" onclick="switchLoginTab('professor')">
+          <span>👨‍🏫</span> Professor Escola
         </button>
-        <button type="button" class="login-tab-btn" id="tabBtnAdmin" onclick="switchLoginTab('admin')">
-          🛠️ Responsável Aula
+        <button type="button" class="segment-btn" id="tabBtnAdmin" onclick="switchLoginTab('admin')">
+          <span>🛠️</span> Coordenação UFU
         </button>
       </div>
 
-      <!-- 1. FORMULÁRIO DO ALUNO -->
-      <div id="formSectionAluno" class="form-section">
+      <!-- 1. ABA ALUNO -->
+      <div id="formSectionAluno" class="form-body">
         <form onsubmit="handleLoginAluno(event)">
-          <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
             
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #CBD5E1; text-transform: uppercase; margin-bottom: 4px; display: block;">
-                1. Selecione sua Turma:
-              </label>
-              <select id="loginTurma" class="input-field" onchange="filtrarAlunosLogin()" required>
+              <label class="input-label">1. Selecione sua Turma:</label>
+              <select id="loginTurma" class="custom-input" onchange="filtrarAlunosLogin()" required>
                 <option value="">-- Escolha sua Turma --</option>
                 {% for t in turmas %}
                   <option value="{{ t.id }}">{{ t.nome }}</option>
@@ -156,10 +237,8 @@
             </div>
 
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #CBD5E1; text-transform: uppercase; margin-bottom: 4px; display: block;">
-                2. Selecione seu Nome:
-              </label>
-              <select id="loginAluno" class="input-field" required>
+              <label class="input-label">2. Selecione seu Nome:</label>
+              <select id="loginAluno" class="custom-input" required>
                 <option value="">-- Primeiro escolha a turma acima --</option>
                 {% for a in alunos %}
                   <option value="{{ a.id }}" data-turma="{{ a.turma_id }}" style="display: none;">
@@ -170,17 +249,15 @@
             </div>
 
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #CBD5E1; text-transform: uppercase; margin-bottom: 4px; display: block;">
-                3. Digite seu PIN (4 Dígitos):
-              </label>
-              <input type="password" id="loginPin" class="input-field" placeholder="••••" maxlength="8" required style="font-size: 1.1rem; letter-spacing: 4px; text-align: center;">
-              <p style="font-size: 0.72rem; color: #94A3B8; margin-top: 4px;">
-                💡 <em>PIN inicial: <strong>1234</strong> (consulte o professor se esqueceu).</em>
+              <label class="input-label">3. Digite seu PIN de Acesso (4 Dígitos):</label>
+              <input type="password" id="loginPin" class="custom-input" placeholder="••••" maxlength="8" required style="letter-spacing: 6px; text-align: center; font-size: 1.2rem;">
+              <p style="font-size: 0.72rem; color: #64748B; margin-top: 6px;">
+                💡 PIN padrão inicial: <strong>1234</strong>
               </p>
             </div>
 
-            <div style="margin-top: 6px;">
-              <button type="submit" class="btn-submit btn-blue-primary">
+            <div style="margin-top: 4px;">
+              <button type="submit" class="submit-btn btn-aluno-style">
                 <span>🚀</span> Entrar no Portal do Aluno
               </button>
             </div>
@@ -189,80 +266,79 @@
         </form>
       </div>
 
-      <!-- 2. FORMULÁRIO DO PROFESSOR DA ESCOLA (READ-ONLY) -->
-      <div id="formSectionProfessor" class="form-section" style="display: none;">
-        <div style="background: rgba(5, 150, 105, 0.1); border-left: 3px solid #059669; padding: 10px 14px; border-radius: 4px; margin-bottom: 14px;">
-          <p style="font-size: 0.78rem; color: #A7F3D0; margin: 0;">
-            ℹ️ <strong>Modo Acompanhamento:</strong> Acesso aos relatórios de assiduidade e notas dos alunos da sua escola.
-          </p>
+      <!-- 2. ABA PROFESSOR ESCOLA (READ-ONLY) -->
+      <div id="formSectionProfessor" class="form-body" style="display: none;">
+        <div style="background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.2); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.78rem; color: #A7F3D0;">
+          👁️ <strong>Modo Acompanhamento:</strong> Acesso para monitorar frequência, XP e relatórios dos alunos da sua escola.
         </div>
 
         <form onsubmit="handleLoginUsuario(event, 'professor')">
-          <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #CBD5E1; text-transform: uppercase; margin-bottom: 4px; display: block;">
-                E-mail Institucional da Escola:
-              </label>
-              <input type="email" id="profEmail" class="input-field" placeholder="professor@alfacoc.com.br" required>
+              <label class="input-label">E-mail Institucional:</label>
+              <input type="email" id="profEmail" class="custom-input" placeholder="professor@alfacoc.com.br" required>
             </div>
 
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #CBD5E1; text-transform: uppercase; margin-bottom: 4px; display: block;">
-                Senha de Acesso:
-              </label>
-              <input type="password" id="profSenha" class="input-field" placeholder="••••••••" required>
+              <label class="input-label">Senha:</label>
+              <input type="password" id="profSenha" class="custom-input" placeholder="••••••••" required>
             </div>
 
-            <div style="margin-top: 6px;">
-              <button type="submit" class="btn-submit btn-emerald-primary">
-                <span>📊</span> Acessar Painel de Acompanhamento
+            <div style="margin-top: 4px;">
+              <button type="submit" class="submit-btn btn-prof-style">
+                <span>📊</span> Acessar Painel Escolar
               </button>
             </div>
 
-            <div style="background: #1E293B; padding: 8px 12px; border-radius: 6px; font-size: 0.72rem; color: #94A3B8; margin-top: 4px;">
-              <strong>Contas Cadastradas:</strong><br>
-              &bull; Alfa COC: <code>professor@alfacoc.com.br</code> (Senha: <code>Professor@Alfa2026</code>)<br>
-              &bull; Melo Viana: <code>professor@meloviana.com.br</code> (Senha: <code>Professor@Melo2026</code>)
+            <!-- Preenchimento Rápido para Demonstração -->
+            <div style="background: #0B0F19; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.75rem; color: #94A3B8;">
+              <span style="display: block; font-weight: 700; margin-bottom: 6px; color: #CBD5E1;">Acesso Rápido de Teste:</span>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="demo-pill" onclick="autoFill('professor@alfacoc.com.br', 'Professor@Alfa2026', 'prof')">
+                  🏫 Alfa COC
+                </button>
+                <button type="button" class="demo-pill" onclick="autoFill('professor@meloviana.com.br', 'Professor@Melo2026', 'prof')">
+                  🏫 Melo Viana
+                </button>
+              </div>
             </div>
+
           </div>
         </form>
       </div>
 
-      <!-- 3. FORMULÁRIO DO RESPONSÁVEL PELA AULA (MASTER ADMIN) -->
-      <div id="formSectionAdmin" class="form-section" style="display: none;">
-        <div style="background: rgba(217, 119, 6, 0.1); border-left: 3px solid #D97706; padding: 10px 14px; border-radius: 4px; margin-bottom: 14px;">
-          <p style="font-size: 0.78rem; color: #FDE68A; margin: 0;">
-            👑 <strong>Acesso Master:</strong> Lançamento de presenças, cadastro de desafios, avaliação de protótipos e diário de bordo.
-          </p>
+      <!-- 3. ABA COORDENAÇÃO UFU (MASTER ADMIN) -->
+      <div id="formSectionAdmin" class="form-body" style="display: none;">
+        <div style="background: rgba(217, 119, 6, 0.08); border: 1px solid rgba(217, 119, 6, 0.2); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.78rem; color: #FDE68A;">
+          👑 <strong>Acesso Master:</strong> Lançamento de presenças, cadastro de atividades e avaliação de robôs.
         </div>
 
         <form onsubmit="handleLoginUsuario(event, 'admin')">
-          <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #CBD5E1; text-transform: uppercase; margin-bottom: 4px; display: block;">
-                E-mail do Responsável / Coordenação:
-              </label>
-              <input type="email" id="adminEmail" class="input-field" placeholder="admin@montebot.ufu.br" required>
+              <label class="input-label">E-mail da Coordenação / Instrutor:</label>
+              <input type="email" id="adminEmail" class="custom-input" placeholder="admin@montebot.ufu.br" required>
             </div>
 
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #CBD5E1; text-transform: uppercase; margin-bottom: 4px; display: block;">
-                Senha de Administrador:
-              </label>
-              <input type="password" id="adminSenha" class="input-field" placeholder="••••••••" required>
+              <label class="input-label">Senha Master:</label>
+              <input type="password" id="adminSenha" class="custom-input" placeholder="••••••••" required>
             </div>
 
-            <div style="margin-top: 6px;">
-              <button type="submit" class="btn-submit btn-amber-primary">
-                <span>🛠️</span> Acessar Painel Master de Controle
+            <div style="margin-top: 4px;">
+              <button type="submit" class="submit-btn btn-admin-style">
+                <span>🛠️</span> Entrar no Painel de Controle
               </button>
             </div>
 
-            <div style="background: #1E293B; padding: 8px 12px; border-radius: 6px; font-size: 0.72rem; color: #94A3B8; margin-top: 4px;">
-              <strong>Conta Master UFU / LINA:</strong><br>
-              &bull; E-mail: <code>admin@montebot.ufu.br</code><br>
-              &bull; Senha: <code>Admin@MonteBot2026</code>
+            <!-- Preenchimento Rápido Master -->
+            <div style="background: #0B0F19; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.75rem; color: #94A3B8;">
+              <span style="display: block; font-weight: 700; margin-bottom: 6px; color: #CBD5E1;">Acesso Rápido Master:</span>
+              <button type="button" class="demo-pill" onclick="autoFill('admin@montebot.ufu.br', 'Admin@MonteBot2026', 'admin')">
+                🔑 Preencher Conta Master UFU
+              </button>
             </div>
+
           </div>
         </form>
       </div>
@@ -272,9 +348,9 @@
   </div>
 
   <!-- Rodapé Institucional -->
-  <footer style="text-align: center; padding: 20px; font-size: 0.78rem; color: #64748B; border-top: 1px solid #1E293B;">
+  <footer style="text-align: center; padding: 24px; font-size: 0.76rem; color: #64748B;">
     <p>
-      &copy; 2026 <strong>Universidade Federal de Uberlândia (UFU)</strong> &bull; <strong>FACOM</strong> &bull; <strong>Laboratório LINA</strong> &bull; <strong>Projeto MONTE BOT</strong>
+      &copy; 2026 <strong>Universidade Federal de Uberlândia (UFU)</strong> &bull; <strong>FACOM</strong> &bull; <strong>Laboratório LINA</strong> &bull; <strong>MONTE BOT</strong>
     </p>
   </footer>
 
@@ -292,6 +368,16 @@
           section.style.display = 'none';
         }
       });
+    }
+
+    function autoFill(email, senha, prefix) {
+      if (prefix === 'prof') {
+        document.getElementById('profEmail').value = email;
+        document.getElementById('profSenha').value = senha;
+      } else {
+        document.getElementById('adminEmail').value = email;
+        document.getElementById('adminSenha').value = senha;
+      }
     }
 
     function filtrarAlunosLogin() {
@@ -334,7 +420,7 @@
         if (data.success) {
           window.location.href = data.redirect || '/portal-aluno';
         } else {
-          alert(data.error || 'Erro ao realizar login');
+          alert(data.error || 'Erro ao realizar login.');
         }
       } catch (err) {
         alert('Erro ao conectar ao servidor.');
