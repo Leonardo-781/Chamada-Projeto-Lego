@@ -2,12 +2,13 @@ import os
 import sqlite3
 from datetime import date, timedelta
 from sqlalchemy import text
-from models import db, Turma, Aluno, SessaoChamada, RegistroPresenca, Medalha, ConquistaAluno, DiarioBordo, Atividade, EntregaAtividade, SlideAula, DuvidaAluno
+from models import db, Usuario, Turma, Aluno, SessaoChamada, RegistroPresenca, Medalha, ConquistaAluno, DiarioBordo, Atividade, EntregaAtividade, SlideAula, DuvidaAluno
 
 def init_db(app):
     with app.app_context():
         db.create_all()
         migrar_colunas(app)
+        seed_usuarios()
         seed_database()
         seed_atividades_e_materiais()
 
@@ -43,99 +44,137 @@ def migrar_colunas(app):
     except Exception as e:
         print(f"Aviso de migracao: {e}")
 
+def seed_usuarios():
+    # Verifica se já existem usuários cadastrados
+    if Usuario.query.first():
+        return
+
+    print("Cadastrando contas institucionais (Responsáveis e Professores)...")
+
+    # 1. Responsável pelas Aulas (Admin Master - UFU / FACOM / LINA / MONTE BOT)
+    admin = Usuario(
+        nome="Coordenação Monte Bot / UFU",
+        email="admin@montebot.ufu.br",
+        perfil="admin_responsavel",
+        escola="UFU / LINA / Monte Bot"
+    )
+    admin.set_senha("Admin@MonteBot2026")
+
+    # 2. Professor Colégio Alfa COC (Apenas Acompanhamento)
+    prof_alfa = Usuario(
+        nome="Professor(a) Colégio Alfa COC",
+        email="professor@alfacoc.com.br",
+        perfil="professor_escola",
+        escola="Colégio Alfa COC"
+    )
+    prof_alfa.set_senha("Professor@Alfa2026")
+
+    # 3. Professor Melo Viana (Apenas Acompanhamento)
+    prof_melo = Usuario(
+        nome="Professor(a) Melo Viana",
+        email="professor@meloviana.com.br",
+        perfil="professor_escola",
+        escola="Melo Viana"
+    )
+    prof_melo.set_senha("Professor@Melo2026")
+
+    db.session.add_all([admin, prof_alfa, prof_melo])
+    db.session.commit()
+    print("Contas institucionais criadas com sucesso!")
+
 def seed_database():
     if Turma.query.first():
         return
 
-    print("Inicializando banco de dados com Alfa COC e Melo Viana...")
+    print("Inicializando turmas e alunos oficiais...")
 
-    # 1. Criação das 3 Turmas Oficiais
+    # 1. As 3 Turmas Oficiais do Projeto
     turma_1 = Turma(
         nome="Alfa COC - Equipe 01",
         codigo="ALFA-01",
-        descricao="Robótica Lego - Alfa COC (Equipe 1)",
-        horario="Horário da Oficina",
-        cor_tema="#E3000B",
+        descricao="Oficina de Robótica e Mecanismos - Colégio Alfa COC (Equipe 01)",
+        horario="Segundas e Quartas, 14:00 - 15:30",
+        cor_tema="#0284C7",
         icone="robot",
-        anotacoes="📌 **Alfa COC - Equipe 01**\nMontagem & Programação: Bianca, Maria Emília, Kaique, Pedro Miguel."
+        anotacoes="📌 **Projeto Monte Bot / LINA / UFU**\nEquipe 01 do Colégio Alfa COC.\n🔧 Montagem & Programação: Bianca, Maria Emília, Kaique, Pedro Miguel."
     )
 
     turma_2 = Turma(
         nome="Alfa COC - Equipe 02",
         codigo="ALFA-02",
-        descricao="Robótica Lego - Alfa COC (Equipe 2)",
-        horario="Horário da Oficina",
-        cor_tema="#0055BF",
-        icone="cube",
-        anotacoes="📌 **Alfa COC - Equipe 02**\nMontagem & Programação: Maria Cecília, Laura, Luísa, João Arthur."
+        descricao="Oficina de Robótica e Mecanismos - Colégio Alfa COC (Equipe 02)",
+        horario="Terças e Quintas, 14:00 - 15:30",
+        cor_tema="#2563EB",
+        icone="cpu",
+        anotacoes="📌 **Projeto Monte Bot / LINA / UFU**\nEquipe 02 do Colégio Alfa COC.\n🔧 Montagem & Programação: Maria Cecília, Laura, Luísa, João Arthur."
     )
 
     turma_3 = Turma(
         nome="Melo Viana - Robótica Lego",
         codigo="MELO-VIANA",
-        descricao="Oficina de Robótica e Montagem Lego - Melo Viana",
-        horario="Horário da Oficina",
-        cor_tema="#00852B",
+        descricao="Laboratório de Robótica Educacional - Escola Melo Viana",
+        horario="Sextas-feiras, 14:00 - 17:00",
+        cor_tema="#059669",
         icone="rocket",
-        anotacoes="📌 **Melo Viana**\nEquipe de Robótica Lego do Melo Viana."
+        anotacoes="📌 **Projeto Monte Bot / LINA / UFU**\nEquipe do Melo Viana."
     )
 
     db.session.add_all([turma_1, turma_2, turma_3])
     db.session.commit()
 
-    # 2. Criação das Medalhas / Conquistas Lego
+    # 2. Medalhas Institucionais
     medalhas = [
         Medalha(
             codigo="primeiro_bloco",
-            nome="Primeiro Bloco",
-            descricao="Participou da primeira aula do projeto Lego com sucesso.",
+            nome="Primeiro Mecanismo",
+            descricao="Concluiu a montagem do primeiro protótipo com sucesso.",
             icone="🧱",
-            cor="#E3000B",
+            cor="#0284C7",
             xp_bonus=15,
             tipo="presenca"
         ),
         Medalha(
             codigo="trabalho_equipe",
-            nome="Espírito de Equipe",
-            descricao="Demonstrou colaboração exemplar e apoio aos colegas de montagem.",
+            nome="Espírito de Equipe & Liderança",
+            descricao="Demonstrou colaboração técnica exemplar na bancada de testes.",
             icone="🤝",
-            cor="#FFD700",
+            cor="#F59E0B",
             xp_bonus=25,
             tipo="especial"
         ),
         Medalha(
             codigo="mestre_organizacao",
-            nome="Mestre da Organização",
-            descricao="Guardou e organizou todas as peças na caixa organizadora perfeitamente.",
+            nome="Organização de Bancada",
+            descricao="Manteve os kits de peças, sensores e motores impecavelmente organizados.",
             icone="📦",
-            cor="#00852B",
+            cor="#059669",
             xp_bonus=20,
             tipo="especial"
         ),
         Medalha(
             codigo="primeiro_robo",
-            nome="Criador de Robôs",
-            descricao="Montou e programou seu primeiro mecanismo motorizado funcional.",
+            nome="Engenharia de Automação",
+            descricao="Programou com precisão sensores e motores angulares em circuito autônomo.",
             icone="🤖",
-            cor="#0055BF",
+            cor="#2563EB",
             xp_bonus=30,
             tipo="especial"
         ),
         Medalha(
             codigo="super_frequencia",
-            nome="Frequência de Ouro",
-            descricao="Alcançou sequência exemplar de presenças sem faltas.",
+            nome="Assiduidade Exemplar",
+            descricao="Alcançou sequência de presenças sem faltas no ciclo de oficinas.",
             icone="⭐",
-            cor="#FF8800",
+            cor="#D97706",
             xp_bonus=40,
             tipo="presenca"
         ),
         Medalha(
             codigo="mestre_supremo",
-            nome="Mestre Construtor Lendário",
-            descricao="Alcançou o nível máximo de dedicação e liderança no projeto.",
+            nome="Mestre em Robótica & IA",
+            descricao="Excelência em resolução de problemas de engenharia e montagem.",
             icone="👑",
-            cor="#9C27B0",
+            cor="#7C3AED",
             xp_bonus=50,
             tipo="especial"
         )
@@ -145,78 +184,64 @@ def seed_database():
 
     # 3. Alunos da Turma 1 (Alfa COC - Equipe 01)
     alunos_t1 = [
-        Aluno(nome="MARIA EDUARDA ROCHA CAMPOS SILVA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-red", pontos_xp=0),
-        Aluno(nome="ANA CAROLINA ZAMPIROLI FERREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-yellow", pontos_xp=0),
-        Aluno(nome="BIANCA OLIVEIRA ALBERTON", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0),
-        Aluno(nome="ESTER ROSA DE MELO", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-purple", pontos_xp=0),
-        Aluno(nome="KAIQUE G. PEREIRA PRIMO", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-ninja", pontos_xp=0),
-        Aluno(nome="LARISSA SANTOS VIEIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-green", pontos_xp=0),
-        Aluno(nome="MARIA ANTÔNIA NAVES COSTA PEREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-orange", pontos_xp=0),
-        Aluno(nome="MARIA EMÍLIA MUNDIM PENA", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=0),
-        Aluno(nome="PEDRO MIGUEL DE ALCANTARA LIMA DIAS", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0),
+        Aluno(nome="MARIA EDUARDA ROCHA CAMPOS SILVA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-blue", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="ANA CAROLINA ZAMPIROLI FERREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-yellow", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="BIANCA OLIVEIRA ALBERTON", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="ESTER ROSA DE MELO", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-purple", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="KAIQUE G. PEREIRA PRIMO", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-ninja", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="LARISSA SANTOS VIEIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-green", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="MARIA ANTÔNIA NAVES COSTA PEREIRA", turma_id=turma_1.id, equipe="Equipe 01", avatar_tipo="lego-orange", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="MARIA EMÍLIA MUNDIM PENA", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="PEDRO MIGUEL DE ALCANTARA LIMA DIAS", turma_id=turma_1.id, equipe="Equipe 01 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0, pin_acesso="1234"),
     ]
 
     # 4. Alunos da Turma 2 (Alfa COC - Equipe 02)
     alunos_t2 = [
-        Aluno(nome="JULIA KINACH RODRIGUES VIEIRA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=0),
-        Aluno(nome="JOÃO ARTHUR CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=0),
-        Aluno(nome="JOÃO MATHEUS CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-ninja", pontos_xp=0),
-        Aluno(nome="LAURA MACHADO SOUSA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-purple", pontos_xp=0),
-        Aluno(nome="LUÍSA SOARES DE OLIVEIRA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-green", pontos_xp=0),
-        Aluno(nome="MANUELA DE SOUSA F. DUMONT", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-orange", pontos_xp=0),
-        Aluno(nome="MARIA LUIZA SANTOS", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-red", pontos_xp=0),
-        Aluno(nome="MARIA TEREZA FERNANDES CAETANO", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=0),
-        Aluno(nome="MARIA CECÍLIA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0),
+        Aluno(nome="JULIA KINACH RODRIGUES VIEIRA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="JOÃO ARTHUR CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-astronaut", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="JOÃO MATHEUS CAIXETA F. SILVA", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-ninja", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="LAURA MACHADO SOUSA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-purple", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="LUÍSA SOARES DE OLIVEIRA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-green", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="MANUELA DE SOUSA F. DUMONT", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-orange", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="MARIA LUIZA SANTOS", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-blue", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="MARIA TEREZA FERNANDES CAETANO", turma_id=turma_2.id, equipe="Equipe 02", avatar_tipo="lego-yellow", pontos_xp=0, pin_acesso="1234"),
+        Aluno(nome="MARIA CECÍLIA", turma_id=turma_2.id, equipe="Equipe 02 (Montagem & Prog.)", avatar_tipo="lego-blue", pontos_xp=0, pin_acesso="1234"),
     ]
 
     db.session.add_all(alunos_t1 + alunos_t2)
     db.session.commit()
 
-    # 5. Conquistas
-    med_primeiro = Medalha.query.filter_by(codigo="primeiro_bloco").first()
-    med_robo = Medalha.query.filter_by(codigo="primeiro_robo").first()
-
-    for a in (alunos_t1 + alunos_t2):
-        if med_primeiro:
-            db.session.add(ConquistaAluno(aluno_id=a.id, medalha_id=med_primeiro.id))
-        if "Montagem" in a.equipe and med_robo:
-            db.session.add(ConquistaAluno(aluno_id=a.id, medalha_id=med_robo.id))
-
-    # 6. Diário de Bordo
+    # 5. Diário de Bordo Inicial
     hoje = date.today()
     diario = DiarioBordo(
         turma_id=turma_1.id,
         data=hoje,
-        titulo="Início das Atividades Lego - Alfa COC & Melo Viana",
-        conteudo="Configuração das 3 turmas:\n"
-                 "- Alfa COC - Equipe 01 (9 alunos)\n"
-                 "- Alfa COC - Equipe 02 (9 alunos)\n"
-                 "- Melo Viana (Pronta para cadastro dos alunos)",
-        categoria="Desafio Lego"
+        titulo="Início do Ciclo de Oficinas STEM - UFU / LINA / Monte Bot",
+        conteudo="Estruturação das turmas e bancadas de robótica:\n"
+                 "- Alfa COC - Equipe 01: Foco em tração e sensores de luminosidade.\n"
+                 "- Alfa COC - Equipe 02: Foco em garras motorizadas e controle giroscópico.\n"
+                 "- Melo Viana: Laboratório aberto para novos cadastros.",
+        categoria="Anotação Pedagógica",
+        autor="Coordenação UFU / LINA"
     )
     db.session.add(diario)
     db.session.commit()
 
-    print("Banco de dados com Alfa COC e Melo Viana configurado!")
+    print("Banco de dados institucional inicializado!")
 
 
 def seed_atividades_e_materiais():
-    # Verifica se já existem atividades
     if Atividade.query.first():
         return
 
-    print("Inicializando Desafios Lego, Slides e Fórum de Dúvidas...")
+    print("Inicializando Desafios e Slides Institucionais...")
     hoje = date.today()
-    turmas = Turma.query.all()
-    t1_id = turmas[0].id if len(turmas) > 0 else None
-    t2_id = turmas[1].id if len(turmas) > 1 else None
 
-    # 1. Atividades e Desafios Lego
     atividades = [
         Atividade(
-            turma_id=None, # Global
-            titulo="Desafio 01: Robô Seguidor de Linha",
-            descricao="Construa a base motriz com dois motores e programe o sensor de cor/luz para seguir a linha preta sem sair da pista. Grave um vídeo curto de até 30s mostrando o robô completando o trajeto.",
+            turma_id=None,
+            titulo="Desafio 01: Seguidor de Linha em Alta Precisão",
+            descricao="Projetar e calibrar a base motriz com dois motores angulares e sensor de cor/reflexão para percorrer o circuito sem desvios.",
             kit_lego="Lego SPIKE Prime",
             xp_recompensa=50,
             data_limite=hoje + timedelta(days=14),
@@ -225,9 +250,9 @@ def seed_atividades_e_materiais():
         ),
         Atividade(
             turma_id=None,
-            titulo="Desafio 02: Garra Mecânica Motorizada",
-            descricao="Projete e monte um mecanismo de garra utilizando engrenagens e motor angular capaz de erguer e transportar uma peça Lego de 2x4 por pelo menos 1 metro de distância.",
-            kit_lego="Lego SPIKE Prime / WeDo",
+            titulo="Desafio 02: Garra Mecânica Articulada com Redução",
+            descricao="Desenvolver mecanismo de garra utilizando trem de engrenagens 8T e 24T para transporte seguro de módulos.",
+            kit_lego="Lego SPIKE Prime",
             xp_recompensa=60,
             data_limite=hoje + timedelta(days=21),
             link_material="https://education.lego.com/pt-br/lessons",
@@ -235,8 +260,8 @@ def seed_atividades_e_materiais():
         ),
         Atividade(
             turma_id=None,
-            titulo="Desafio 03: Carro Anticolisão com Sensor Ultrassônico",
-            descricao="Construa um veículo autônomo que ande para frente em linha reta e, ao detectar um obstáculo a menos de 15 cm, pare, emita um sinal sonoro e manobre 90 graus para a direita.",
+            titulo="Desafio 03: Veículo com Frenagem de Emergência por Ultrassom",
+            descricao="Construção de robô autônomo com sensor de distância ultrassônico capaz de desacelerar suavemente a 15 cm do obstáculo.",
             kit_lego="Lego SPIKE Prime",
             xp_recompensa=70,
             data_limite=hoje + timedelta(days=28),
@@ -247,67 +272,32 @@ def seed_atividades_e_materiais():
     db.session.add_all(atividades)
     db.session.commit()
 
-    # 2. Slides e Manuais de Aula
     slides = [
         SlideAula(
             turma_id=None,
-            titulo="Aula 01: Introdução ao Lego SPIKE Prime e Hub Inteligente",
-            descricao="Apresentação com os componentes básicos do kit: Hub inteligente, motores de média/grande potência, sensores de cor, força e distância.",
+            titulo="Aula 01: Arquitetura de Hardware e Hub SPIKE Prime",
+            descricao="Componentes de controle, portas digitais, giroscópio de 6 eixos e comunicação via Bluetooth.",
             numero_aula=1,
             link_slide="https://docs.google.com/presentation",
             tipo="slides"
         ),
         SlideAula(
             turma_id=None,
-            titulo="Aula 02: Mecânica Básica - Engrenagens, Redução e Multiplicação",
-            descricao="Guia ilustrado explicando torque, velocidade, proporção de engrenagens 8T, 24T, 40T e eixos transversais.",
+            titulo="Aula 02: Física Aplicada a Mecanismos e Engrenagens",
+            descricao="Torque, velocidade angular, relações de transmissão e sustentação de eixos paralelos.",
             numero_aula=2,
             link_slide="https://education.lego.com",
             tipo="manual_montagem"
         ),
         SlideAula(
             turma_id=None,
-            titulo="Aula 03: Programação em Blocos (Word Blocks) & Lógica de Sensores",
-            descricao="Tutorial prático ensinando loops de repetição, condições 'Se... Então' e calibração do sensor de luminosidade.",
+            titulo="Aula 03: Lógica Algorítmica e Estruturas de Decisão",
+            descricao="Programação por blocos e Python: estruturas condicionais e leitura de telemetria em tempo real.",
             numero_aula=3,
             link_slide="https://education.lego.com",
             tipo="apostila"
-        ),
-        SlideAula(
-            turma_id=None,
-            titulo="Aula 04: Construção de Chassi e Tração 4x2",
-            descricao="Passo a passo em vídeo demonstrando a fixação dos motores angulares no chassi estrutural.",
-            numero_aula=4,
-            link_slide="https://youtube.com",
-            tipo="video_tutorial"
         )
     ]
     db.session.add_all(slides)
     db.session.commit()
-
-    # 3. Dúvidas Frequentes da Oficina
-    duvidas = [
-        DuvidaAluno(
-            turma_id=t1_id,
-            nome_autor="Aluno(a) Alfa COC",
-            titulo="Como calibrar o sensor de cor para pista clara e escura?",
-            pergunta="Professor, nosso sensor de cor está oscilando entre preto e branco na junção da pista. Qual a melhor porcentagem de reflexão para o bloco de decisão?",
-            categoria="Programação & Sensores",
-            status="respondida",
-            resposta_professor="Excelente pergunta! Recomendamos fazer a leitura em tempo real no app da Lego: meça o valor na linha preta (ex: 15%) e no chão branco (ex: 85%). O ponto de corte ideal é a média entre eles: (15 + 85) / 2 = 50%!",
-            respondido_por="Professor de Robótica"
-        ),
-        DuvidaAluno(
-            turma_id=t2_id,
-            nome_autor="Equipe 02",
-            titulo="Engrenagem escapando na subida da rampa",
-            pergunta="Quando nosso robô tenta subir a rampa inclinada, as engrenagens estalam e perdem tração. Como travar os eixos?",
-            categoria="Montagem / Mecânica",
-            status="respondida",
-            resposta_professor="Para evitar que o eixo flexione com o torque, utilize duas vigas paralelas para suportar o eixo em ambas as extremidades (apoio duplo) em vez de apoio único.",
-            respondido_por="Professor de Robótica"
-        )
-    ]
-    db.session.add_all(duvidas)
-    db.session.commit()
-    print("Atividades, Slides e Dúvidas populados com sucesso!")
+    print("Desafios e Slides cadastrados com sucesso!")

@@ -3,84 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Portal de Robótica Lego{% endblock %}</title>
-  <!-- Estilos Temáticos Lego High-Tech -->
+  <title>{% block title %}Portal Institucional de Robótica - UFU | FACOM | LINA | MONTE BOT{% endblock %}</title>
+  <!-- Estilos Institucionais & STEM -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-  <!-- Top Lego Header com Studs e Arena Timer -->
-  <header class="lego-header">
+  <!-- Barra Superior Institucional com Logos UFU, FACOM, LINA, MONTE BOT -->
+  <div style="background: #FFFFFF; border-bottom: 2px solid #2563EB; padding: 6px 20px;">
+    <div style="max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <img src="{{ url_for('static', filename='img/logos_institucionais.jpg') }}" alt="UFU | FACOM | LINA | MONTE BOT" style="max-height: 38px; object-fit: contain;">
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px; font-size: 0.82rem;">
+        {% if current_user %}
+          {% if current_user.is_admin %}
+            <span style="background: #D97706; color: white; padding: 3px 10px; border-radius: 12px; font-weight: 800;">
+              👑 Responsável (Admin Master)
+            </span>
+          {% else %}
+            <span style="background: #059669; color: white; padding: 3px 10px; border-radius: 12px; font-weight: 800;">
+              👨‍🏫 Professor Escola (Acompanhamento)
+            </span>
+          {% endif %}
+          <span style="color: #475569; font-weight: 700;">{{ current_user.nome }}</span>
+          <a href="{{ url_for('logout') }}" style="color: #EF4444; text-decoration: none; font-weight: 800; margin-left: 6px;">[Sair]</a>
+        {% elif current_aluno %}
+          <span style="background: #2563EB; color: white; padding: 3px 10px; border-radius: 12px; font-weight: 800;">
+            🎓 Aluno: {{ current_aluno.nome }}
+          </span>
+          <a href="{{ url_for('logout') }}" style="color: #EF4444; text-decoration: none; font-weight: 800; margin-left: 6px;">[Sair]</a>
+        {% else %}
+          <a href="{{ url_for('login_page') }}" style="background: #2563EB; color: white; padding: 4px 12px; border-radius: 6px; text-decoration: none; font-weight: 800;">
+            🔐 Fazer Login
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Header & Navbar da Aplicação -->
+  <header class="lego-header" style="background: #0F172A; border-bottom: 2px solid #334155;">
     <nav class="navbar">
-      <a href="{{ url_for('index') }}" class="brand">
-        <div class="brand-icon">🧱</div>
+      <a href="{{ url_for('home') }}" class="brand">
+        <div class="brand-icon" style="background: #2563EB; border-radius: 8px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+          🤖
+        </div>
         <div class="brand-text">
-          <h1>Lego Robotics Hub</h1>
-          <p>Portal STEM & Laboratório de Robótica</p>
+          <h1 style="font-size: 1.15rem; font-weight: 800; color: #F8FAFC;">MONTE BOT &bull; Hub de Robótica</h1>
+          <p style="font-size: 0.72rem; color: #94A3B8;">Projeto de Engenharia & Robótica UFU / FACOM / LINA</p>
         </div>
       </a>
 
-      <!-- Arena Mission Timer (2m30s) para Bancada -->
-      <div class="arena-timer-box" style="display: flex; align-items: center; gap: 8px; background: rgba(15, 23, 42, 0.6); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
-        <span style="font-size: 0.8rem; font-weight: 800; color: #F59E0B; text-transform: uppercase;">⏱️ Arena:</span>
-        <span id="arenaTimerDisplay" style="font-family: 'Courier New', monospace; font-size: 1.15rem; font-weight: 900; color: #FFFFFF; min-width: 54px;">02:30</span>
+      <!-- Arena Mission Timer (2m30s) -->
+      <div class="arena-timer-box" style="display: flex; align-items: center; gap: 8px; background: #1E293B; padding: 5px 12px; border-radius: 8px; border: 1px solid #334155;">
+        <span style="font-size: 0.75rem; font-weight: 800; color: #F59E0B; text-transform: uppercase;">⏱️ Arena:</span>
+        <span id="arenaTimerDisplay" style="font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 900; color: #FFFFFF; min-width: 50px;">02:30</span>
         <div style="display: flex; gap: 4px;">
           <button type="button" class="timer-btn" id="timerStartBtn" onclick="toggleArenaTimer()" title="Iniciar / Pausar">▶️</button>
           <button type="button" class="timer-btn" onclick="resetArenaTimer()" title="Reiniciar (2m30s)">🔄</button>
         </div>
       </div>
 
+      <!-- Links de Navegação Filtrados por Perfil -->
       <ul class="nav-links">
-        <li>
-          <a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">
-            <span>🏠</span> Início
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('chamada') }}" class="nav-link {% if request.path == '/chamada' %}active{% endif %}">
-            <span>📋</span> Chamada
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('atividades_page') }}" class="nav-link {% if request.path == '/atividades' %}active{% endif %}">
-            <span>🎯</span> Atividades
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('slides_page') }}" class="nav-link {% if request.path == '/slides' %}active{% endif %}">
-            <span>📑</span> Slides
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('forum_page') }}" class="nav-link {% if request.path == '/duvidas' %}active{% endif %}">
-            <span>💬</span> Dúvidas
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('anotacoes_page') }}" class="nav-link {% if request.path == '/anotacoes' %}active{% endif %}">
-            <span>📝</span> Diário
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('alunos_page') }}" class="nav-link {% if request.path == '/alunos' %}active{% endif %}">
-            <span>👥</span> Alunos
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('gamificacao') }}" class="nav-link {% if request.path == '/gamificacao' %}active{% endif %}">
-            <span>🏆</span> Ranking
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('historico') }}" class="nav-link {% if request.path == '/historico' %}active{% endif %}">
-            <span>📊</span> Histórico
-          </a>
-        </li>
-        <li>
-          <a href="{{ url_for('estudos_page') }}" class="nav-link nav-student-highlight {% if request.path.startswith('/estudos') or request.path.startswith('/aluno') %}active{% endif %}" style="background: rgba(245, 158, 11, 0.25); border: 1px solid #F59E0B; color: #FEF3C7; font-weight: 800;">
-            <span>🎓</span> Área do Aluno
-          </a>
-        </li>
+        {% if current_user and current_user.is_admin %}
+          <!-- Menu do Responsável / Admin Master -->
+          <li><a href="{{ url_for('painel_admin') }}" class="nav-link {% if request.path == '/painel-admin' %}active{% endif %}">🏠 Painel</a></li>
+          <li><a href="{{ url_for('chamada') }}" class="nav-link {% if request.path == '/chamada' %}active{% endif %}">📋 Chamada</a></li>
+          <li><a href="{{ url_for('atividades_page') }}" class="nav-link {% if request.path == '/atividades' %}active{% endif %}">🎯 Desafios</a></li>
+          <li><a href="{{ url_for('slides_page') }}" class="nav-link {% if request.path == '/slides' %}active{% endif %}">📑 Slides</a></li>
+          <li><a href="{{ url_for('forum_page') }}" class="nav-link {% if request.path == '/duvidas' %}active{% endif %}">💬 Dúvidas</a></li>
+          <li><a href="{{ url_for('anotacoes_page') }}" class="nav-link {% if request.path == '/anotacoes' %}active{% endif %}">📝 Diário</a></li>
+          <li><a href="{{ url_for('alunos_page') }}" class="nav-link {% if request.path == '/alunos' %}active{% endif %}">👥 Alunos</a></li>
+          <li><a href="{{ url_for('gamificacao') }}" class="nav-link {% if request.path == '/gamificacao' %}active{% endif %}">🏆 Ranking</a></li>
+          <li><a href="{{ url_for('historico') }}" class="nav-link {% if request.path == '/historico' %}active{% endif %}">📊 Histórico</a></li>
+        {% elif current_user and current_user.is_professor_escola %}
+          <!-- Menu do Professor da Escola (Acompanhamento) -->
+          <li><a href="{{ url_for('painel_escola') }}" class="nav-link {% if request.path == '/painel-escola' %}active{% endif %}">📊 Painel Escolar</a></li>
+          <li><a href="{{ url_for('atividades_page') }}" class="nav-link {% if request.path == '/atividades' %}active{% endif %}">🎯 Desafios</a></li>
+          <li><a href="{{ url_for('slides_page') }}" class="nav-link {% if request.path == '/slides' %}active{% endif %}">📑 Slides</a></li>
+          <li><a href="{{ url_for('forum_page') }}" class="nav-link {% if request.path == '/duvidas' %}active{% endif %}">💬 Dúvidas</a></li>
+          <li><a href="{{ url_for('anotacoes_page') }}" class="nav-link {% if request.path == '/anotacoes' %}active{% endif %}">📝 Diário</a></li>
+          <li><a href="{{ url_for('gamificacao') }}" class="nav-link {% if request.path == '/gamificacao' %}active{% endif %}">🏆 Ranking</a></li>
+        {% elif current_aluno %}
+          <!-- Menu do Aluno -->
+          <li><a href="{{ url_for('portal_aluno') }}" class="nav-link active">🎓 Meu Portal de Estudos</a></li>
+          <li><a href="{{ url_for('gamificacao') }}" class="nav-link">🏆 Placar Geral</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login_page') }}" class="nav-link active">🔐 Acessar Sistema</a></li>
+        {% endif %}
       </ul>
     </nav>
   </header>
@@ -90,12 +103,18 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Rodapé Lego -->
-  <footer class="lego-footer">
-    <p>🧱 <strong>Portal de Robótica & Montagem LEGO</strong> &bull; Alfa COC & Melo Viana &bull; Atividades, Slides, Dúvidas e Gamificação</p>
+  <!-- Rodapé Institucional -->
+  <footer class="lego-footer" style="background: #0B0F19; border-top: 1px solid #1E293B; padding: 24px 20px; margin-top: auto;">
+    <div style="max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 0.82rem; color: #94A3B8;">
+      <div>
+        🏛️ <strong>UFU &bull; FACOM &bull; Laboratório LINA &bull; MONTE BOT</strong> &bull; Robótica Educacional
+      </div>
+      <div>
+        Colégio Alfa COC &bull; Escola Melo Viana
+      </div>
+    </div>
   </footer>
 
-  <!-- Scripts -->
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script>
     // Arena Mission Timer (2m30s)
@@ -111,7 +130,7 @@
       if (el) {
         el.innerText = display;
         if (timerSeconds <= 30 && timerSeconds > 0) {
-          el.style.color = '#EF4444'; // Vermelho alerta
+          el.style.color = '#EF4444';
         } else if (timerSeconds === 0) {
           el.style.color = '#EF4444';
           el.innerText = "TEMPO!";

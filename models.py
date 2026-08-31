@@ -1,10 +1,56 @@
 from datetime import datetime, timezone, date
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
 def utc_now():
     return datetime.now(timezone.utc)
+
+
+class Usuario(db.Model):
+    __tablename__ = 'usuarios'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    senha_hash = db.Column(db.String(255), nullable=False)
+    perfil = db.Column(db.String(50), nullable=False, default='professor_escola') # 'admin_responsavel' ou 'professor_escola'
+    escola = db.Column(db.String(100), default='Geral') # 'Alfa COC', 'Melo Viana', 'UFU / LINA / Monte Bot'
+    ativo = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=utc_now)
+
+    def set_senha(self, senha):
+        self.senha_hash = generate_password_hash(senha)
+
+    def verificar_senha(self, senha):
+        return check_password_hash(self.senha_hash, senha)
+
+    @property
+    def is_admin(self):
+        return self.perfil == 'admin_responsavel'
+
+    @property
+    def is_professor_escola(self):
+        return self.perfil == 'professor_escola'
+
+    @property
+    def perfil_nome(self):
+        return 'Responsável pelas Aulas (Admin Master)' if self.is_admin else 'Professor(a) da Escola (Acompanhamento)'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'email': self.email,
+            'perfil': self.perfil,
+            'perfil_nome': 'Responsável pelas Aulas (Admin Master)' if self.is_admin else 'Professor(a) da Escola (Acompanhamento)',
+            'escola': self.escola,
+            'ativo': self.ativo,
+            'is_admin': self.is_admin,
+            'created_at': self.created_at.strftime('%d/%m/%Y')
+        }
+
 
 class Turma(db.Model):
     __tablename__ = 'turmas'
@@ -14,9 +60,9 @@ class Turma(db.Model):
     codigo = db.Column(db.String(20), unique=True, nullable=False)
     descricao = db.Column(db.String(255), default='')
     horario = db.Column(db.String(100), default='')
-    cor_tema = db.Column(db.String(20), default='#E3000B')  # Vermelho Lego
-    icone = db.Column(db.String(50), default='cube')
-    anotacoes = db.Column(db.Text, default='')  # Anotações gerais e pedagógicas da turma
+    cor_tema = db.Column(db.String(20), default='#0284C7')
+    icone = db.Column(db.String(50), default='robot')
+    anotacoes = db.Column(db.Text, default='')
 
     alunos = db.relationship('Aluno', backref='turma', lazy=True, cascade='all, delete-orphan')
     sessoes = db.relationship('SessaoChamada', backref='turma', lazy=True, cascade='all, delete-orphan')
@@ -48,8 +94,8 @@ class Aluno(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'), nullable=False)
-    equipe = db.Column(db.String(50), default='Construtores')
-    avatar_tipo = db.Column(db.String(50), default='lego-red')
+    equipe = db.Column(db.String(50), default='Equipe de Robótica')
+    avatar_tipo = db.Column(db.String(50), default='lego-blue')
     pontos_xp = db.Column(db.Integer, default=0)
     pin_acesso = db.Column(db.String(10), default='1234')
     ativo = db.Column(db.Boolean, default=True)
@@ -66,7 +112,7 @@ class Aluno(db.Model):
         if xp < 50:
             return {
                 'nivel': 1,
-                'titulo': 'Aprendiz de Blocos',
+                'titulo': 'Aprendiz de Robótica',
                 'badge': '🧱',
                 'proximo_xp': 50,
                 'progresso': min(100, int((xp / 50) * 100))
@@ -74,7 +120,7 @@ class Aluno(db.Model):
         elif xp < 150:
             return {
                 'nivel': 2,
-                'titulo': 'Construtor Ágil',
+                'titulo': 'Construtor Mecânico',
                 'badge': '⚙️',
                 'proximo_xp': 150,
                 'progresso': min(100, int(((xp - 50) / 100) * 100))
@@ -82,7 +128,7 @@ class Aluno(db.Model):
         elif xp < 300:
             return {
                 'nivel': 3,
-                'titulo': 'Engenheiro Robótico',
+                'titulo': 'Engenheiro de Automação',
                 'badge': '🤖',
                 'proximo_xp': 300,
                 'progresso': min(100, int(((xp - 150) / 150) * 100))
@@ -90,7 +136,7 @@ class Aluno(db.Model):
         elif xp < 500:
             return {
                 'nivel': 4,
-                'titulo': 'Mestre da Criação',
+                'titulo': 'Projetista de Robôs',
                 'badge': '🚀',
                 'proximo_xp': 500,
                 'progresso': min(100, int(((xp - 300) / 200) * 100))
@@ -98,7 +144,7 @@ class Aluno(db.Model):
         else:
             return {
                 'nivel': 5,
-                'titulo': 'Mestre Construtor Lendário',
+                'titulo': 'Mestre em Robótica e IA',
                 'badge': '👑',
                 'proximo_xp': 1000,
                 'progresso': 100
@@ -158,7 +204,7 @@ class SessaoChamada(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'), nullable=False)
     data = db.Column(db.Date, nullable=False, default=date.today)
-    topico = db.Column(db.String(200), default='Oficina Lego')
+    topico = db.Column(db.String(200), default='Oficina de Robótica')
     observacoes = db.Column(db.Text, default='')
     proxima_aula = db.Column(db.Text, default='')
     created_at = db.Column(db.DateTime, default=utc_now)
@@ -176,7 +222,7 @@ class SessaoChamada(db.Model):
             'turma_id': self.turma_id,
             'turma_nome': self.turma.nome if self.turma else '',
             'turma_codigo': self.turma.codigo if self.turma else '',
-            'turma_cor': self.turma.cor_tema if self.turma else '#E3000B',
+            'turma_cor': self.turma.cor_tema if self.turma else '#0284C7',
             'data': self.data.strftime('%Y-%m-%d'),
             'data_formatada': self.data.strftime('%d/%m/%Y'),
             'topico': self.topico,
@@ -208,7 +254,7 @@ class RegistroPresenca(db.Model):
             'sessao_id': self.sessao_id,
             'aluno_id': self.aluno_id,
             'aluno_nome': self.aluno.nome if self.aluno else '',
-            'aluno_avatar': self.aluno.avatar_tipo if self.aluno else 'lego-red',
+            'aluno_avatar': self.aluno.avatar_tipo if self.aluno else 'lego-blue',
             'aluno_equipe': self.aluno.equipe if self.aluno else '',
             'status': self.status,
             'justificativa': self.justificativa,
@@ -228,7 +274,7 @@ class DiarioBordo(db.Model):
     titulo = db.Column(db.String(150), nullable=False)
     conteudo = db.Column(db.Text, nullable=False)
     categoria = db.Column(db.String(50), default='Anotação Pedagógica')
-    autor = db.Column(db.String(100), default='Professor(a)')
+    autor = db.Column(db.String(100), default='Instrutor(a) UFU / LINA')
     created_at = db.Column(db.DateTime, default=utc_now)
 
     def to_dict(self):
@@ -237,7 +283,7 @@ class DiarioBordo(db.Model):
             'turma_id': self.turma_id,
             'turma_nome': self.turma.nome if self.turma else '',
             'turma_codigo': self.turma.codigo if self.turma else '',
-            'turma_cor': self.turma.cor_tema if self.turma else '#E3000B',
+            'turma_cor': self.turma.cor_tema if self.turma else '#0284C7',
             'data': self.data.strftime('%Y-%m-%d'),
             'data_formatada': self.data.strftime('%d/%m/%Y'),
             'titulo': self.titulo,
@@ -248,22 +294,18 @@ class DiarioBordo(db.Model):
         }
 
 
-# ==========================================
-# NOVOS MODELOS: ATIVIDADES & ENTREGAS
-# ==========================================
-
 class Atividade(db.Model):
     __tablename__ = 'atividades'
 
     id = db.Column(db.Integer, primary_key=True)
-    turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'), nullable=True) # Se null, vale para todas
+    turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'), nullable=True)
     titulo = db.Column(db.String(150), nullable=False)
     descricao = db.Column(db.Text, nullable=False)
-    kit_lego = db.Column(db.String(100), default='Lego SPIKE Prime') # SPIKE Prime, BricQ, WeDo 2.0, Mindstorms
-    xp_recompensa = db.Column(db.Integer, default=50) # Pontos de XP concedidos ao concluir
+    kit_lego = db.Column(db.String(100), default='Lego SPIKE Prime')
+    xp_recompensa = db.Column(db.Integer, default=50)
     data_limite = db.Column(db.Date, nullable=True)
-    link_material = db.Column(db.String(255), default='') # Link do guia de montagem / tutorial
-    status = db.Column(db.String(20), default='ativo') # ativo, encerrado
+    link_material = db.Column(db.String(255), default='')
+    status = db.Column(db.String(20), default='ativo')
     created_at = db.Column(db.DateTime, default=utc_now)
 
     entregas = db.relationship('EntregaAtividade', backref='atividade', lazy=True, cascade='all, delete-orphan')
@@ -278,7 +320,7 @@ class Atividade(db.Model):
             'turma_id': self.turma_id,
             'turma_nome': self.turma.nome if self.turma else 'Todas as Turmas',
             'turma_codigo': self.turma.codigo if self.turma else 'GERAL',
-            'turma_cor': self.turma.cor_tema if self.turma else '#E3000B',
+            'turma_cor': self.turma.cor_tema if self.turma else '#0284C7',
             'titulo': self.titulo,
             'descricao': self.descricao,
             'kit_lego': self.kit_lego,
@@ -302,9 +344,9 @@ class EntregaAtividade(db.Model):
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False)
     equipe = db.Column(db.String(100), default='')
     descricao_solucao = db.Column(db.Text, default='')
-    link_foto_video = db.Column(db.String(500), default='') # Link do Google Drive, YouTube, Foto, etc.
+    link_foto_video = db.Column(db.String(500), default='')
     arquivo_anexo = db.Column(db.String(500), default='')
-    status = db.Column(db.String(20), default='pendente') # pendente, aprovado, revisar
+    status = db.Column(db.String(20), default='pendente')
     feedback_professor = db.Column(db.Text, default='')
     xp_concedido = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=utc_now)
@@ -317,7 +359,7 @@ class EntregaAtividade(db.Model):
             'atividade_titulo': self.atividade.titulo if self.atividade else '',
             'aluno_id': self.aluno_id,
             'aluno_nome': self.aluno.nome if self.aluno else '',
-            'aluno_avatar': self.aluno.avatar_tipo if self.aluno else 'lego-red',
+            'aluno_avatar': self.aluno.avatar_tipo if self.aluno else 'lego-blue',
             'aluno_turma': self.aluno.turma.nome if (self.aluno and self.aluno.turma) else '',
             'equipe': self.equipe or (self.aluno.equipe if self.aluno else ''),
             'descricao_solucao': self.descricao_solucao or '',
@@ -331,10 +373,6 @@ class EntregaAtividade(db.Model):
         }
 
 
-# ==========================================
-# NOVOS MODELOS: SLIDES & MATERIAIS
-# ==========================================
-
 class SlideAula(db.Model):
     __tablename__ = 'slides_aula'
 
@@ -343,8 +381,8 @@ class SlideAula(db.Model):
     titulo = db.Column(db.String(150), nullable=False)
     descricao = db.Column(db.Text, default='')
     numero_aula = db.Column(db.Integer, default=1)
-    link_slide = db.Column(db.String(500), nullable=False) # Link Google Slides, Canva, OneDrive, PDF
-    tipo = db.Column(db.String(50), default='slides') # slides, manual_montagem, apostila, video_tutorial, codigo
+    link_slide = db.Column(db.String(500), nullable=False)
+    tipo = db.Column(db.String(50), default='slides')
     created_at = db.Column(db.DateTime, default=utc_now)
 
     def to_dict(self):
@@ -353,7 +391,7 @@ class SlideAula(db.Model):
             'turma_id': self.turma_id,
             'turma_nome': self.turma.nome if self.turma else 'Todas as Turmas',
             'turma_codigo': self.turma.codigo if self.turma else 'GERAL',
-            'turma_cor': self.turma.cor_tema if self.turma else '#E3000B',
+            'turma_cor': self.turma.cor_tema if self.turma else '#0284C7',
             'titulo': self.titulo,
             'descricao': self.descricao or '',
             'numero_aula': self.numero_aula,
@@ -363,23 +401,19 @@ class SlideAula(db.Model):
         }
 
 
-# ==========================================
-# NOVOS MODELOS: FÓRUM & DÚVIDAS
-# ==========================================
-
 class DuvidaAluno(db.Model):
     __tablename__ = 'duvidas_aluno'
 
     id = db.Column(db.Integer, primary_key=True)
     turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'), nullable=True)
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=True)
-    nome_autor = db.Column(db.String(100), default='Aluno Construtor')
+    nome_autor = db.Column(db.String(100), default='Aluno')
     titulo = db.Column(db.String(150), nullable=False)
     pergunta = db.Column(db.Text, nullable=False)
-    categoria = db.Column(db.String(50), default='Programação & Sensores') # Montagem / Mecânica, Programação / Sensores, Peças & Kits, Geral
-    status = db.Column(db.String(20), default='aberta') # aberta, respondida, resolvida
+    categoria = db.Column(db.String(50), default='Programação & Sensores')
+    status = db.Column(db.String(20), default='aberta')
     resposta_professor = db.Column(db.Text, default='')
-    respondido_por = db.Column(db.String(100), default='Professor(a)')
+    respondido_por = db.Column(db.String(100), default='Instrutor(a) UFU')
     created_at = db.Column(db.DateTime, default=utc_now)
     respondido_em = db.Column(db.DateTime, nullable=True)
 
@@ -389,7 +423,7 @@ class DuvidaAluno(db.Model):
             'turma_id': self.turma_id,
             'turma_nome': self.turma.nome if self.turma else 'Geral',
             'turma_codigo': self.turma.codigo if self.turma else 'GERAL',
-            'turma_cor': self.turma.cor_tema if self.turma else '#E3000B',
+            'turma_cor': self.turma.cor_tema if self.turma else '#0284C7',
             'aluno_id': self.aluno_id,
             'nome_autor': self.aluno.nome if self.aluno else self.nome_autor,
             'aluno_avatar': self.aluno.avatar_tipo if self.aluno else 'lego-blue',
@@ -399,7 +433,7 @@ class DuvidaAluno(db.Model):
             'categoria': self.categoria,
             'status': self.status,
             'resposta_professor': self.resposta_professor or '',
-            'respondido_por': self.respondido_por or 'Professor(a)',
+            'respondido_por': self.respondido_por or 'Instrutor(a)',
             'created_at': self.created_at.strftime('%d/%m/%Y %H:%M'),
             'respondido_em': self.respondido_em.strftime('%d/%m/%Y %H:%M') if self.respondido_em else ''
         }
@@ -413,7 +447,7 @@ class Medalha(db.Model):
     nome = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.String(255), nullable=False)
     icone = db.Column(db.String(50), default='🏆')
-    cor = db.Column(db.String(20), default='#FFD700')
+    cor = db.Column(db.String(20), default='#F59E0B')
     xp_bonus = db.Column(db.Integer, default=20)
     tipo = db.Column(db.String(30), default='presenca')
 

@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel do Professor - Acompanhamento Escolar{% endblock %}
+
+{% block content %}
+
+<!-- Header Institucional do Professor -->
+<div class="lego-card" style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border: 1.5px solid #334155; padding: 24px; margin-bottom: 24px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+        <span style="background: #065F46; color: #A7F3D0; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase;">
+          👁️ Modo Acompanhamento Escolar (Read-Only)
+        </span>
+        <span style="color: #94A3B8; font-size: 0.82rem;">{{ usuario.escola }}</span>
+      </div>
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: #F8FAFC;">
+        Painel de Acompanhamento: {{ usuario.nome }}
+      </h2>
+      <p style="color: #94A3B8; font-size: 0.88rem; margin-top: 2px;">
+        Visualização de frequência, evolução de XP e relatórios técnicos do projeto de robótica
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a href="{{ url_for('exportar_csv', turma_id=turma_filtro) }}" class="btn-lego btn-green">
+        <span>📥</span> Exportar Relatório Geral (Excel/CSV)
+      </a>
+      <a href="{{ url_for('logout') }}" class="btn-lego btn-red">
+        <span>🚪</span> Sair
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Filtro de Turma -->
+<div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 6px;">
+  <a href="{{ url_for('painel_escola') }}" class="btn-lego {% if not turma_filtro %}btn-blue{% else %}btn-gray{% endif %}">
+    Todas as Turmas
+  </a>
+  {% for t in turmas %}
+    <a href="{{ url_for('painel_escola', turma_id=t.id) }}" class="btn-lego {% if turma_filtro == t.id %}btn-blue{% else %}btn-gray{% endif %}">
+      {{ t.nome }} ({{ t.total_alunos }} alunos)
+    </a>
+  {% endfor %}
+</div>
+
+<!-- Estatísticas Rápidas -->
+<div class="stats-grid" style="margin-bottom: 24px;">
+  <div class="stat-card" style="border-left: 4px solid #2563EB;">
+    <div class="stat-icon">👥</div>
+    <div>
+      <div class="stat-value">{{ alunos|length }}</div>
+      <div class="stat-label">Alunos Monitorados</div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="border-left: 4px solid #059669;">
+    <div class="stat-icon">📋</div>
+    <div>
+      <div class="stat-value">{{ sessoes|length }}</div>
+      <div class="stat-label">Oficinas Realizadas</div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="border-left: 4px solid #F59E0B;">
+    <div class="stat-icon">🎯</div>
+    <div>
+      <div class="stat-value">{{ entregas|length }}</div>
+      <div class="stat-label">Projetos & Robôs Entregues</div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="border-left: 4px solid #7C3AED;">
+    <div class="stat-icon">📝</div>
+    <div>
+      <div class="stat-value">{{ diarios|length }}</div>
+      <div class="stat-label">Notas Pedagógicas UFU</div>
+    </div>
+  </div>
+</div>
+
+<!-- Grid Principal de Acompanhamento -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 30px;">
+  
+  <!-- 1. Tabela de Alunos e Assiduidade -->
+  <div class="lego-card">
+    <div class="lego-card-header" style="background: #1E293B;">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: #F8FAFC;">
+        📊 Quadro de Assiduidade e Pontuação Técnica
+      </h3>
+    </div>
+    <div class="lego-card-body" style="padding: 0; overflow-x: auto;">
+      <table class="attendance-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Aluno(a)</th>
+            <th>Equipe</th>
+            <th>Taxa de Presença</th>
+            <th>Pontos XP</th>
+            <th>Nível</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in alunos %}
+            {% set stats = a.estatisticas %}
+            {% set lvl = a.info_nivel %}
+            <tr>
+              <td>
+                <div style="font-weight: 800; color: #F8FAFC;">{{ a.nome }}</div>
+                <div style="font-size: 0.75rem; color: #94A3B8;">{{ a.turma.nome }}</div>
+              </td>
+              <td>
+                <span style="font-size: 0.8rem; font-weight: 700; color: #CBD5E1;">{{ a.equipe }}</span>
+              </td>
+              <td style="min-width: 130px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="flex: 1; height: 8px; background: #334155; border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; width: {{ stats['porcentagem'] }}%; background: {% if stats['porcentagem'] >= 75 %}#10B981{% elif stats['porcentagem'] >= 50 %}#F59E0B{% else %}#EF4444{% endif %};"></div>
+                  </div>
+                  <span style="font-size: 0.8rem; font-weight: 800; color: #F8FAFC;">{{ stats['porcentagem'] }}%</span>
+                </div>
+                <div style="font-size: 0.72rem; color: #94A3B8; margin-top: 2px;">
+                  {{ stats['presentes'] }}P &bull; {{ stats['faltas'] }}F &bull; {{ stats['justificadas'] }}J
+                </div>
+              </td>
+              <td>
+                <span style="font-size: 0.95rem; font-weight: 900; color: #F59E0B;">{{ a.pontos_xp }} XP</span>
+              </td>
+              <td>
+                <span style="font-size: 0.75rem; font-weight: 800; background: #334155; color: #F8FAFC; padding: 2px 8px; border-radius: 4px;">
+                  {{ lvl['badge'] }} Nível {{ lvl['nivel'] }}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2. Diário Pedagógico da UFU / LINA -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    
+    <div class="lego-card">
+      <div class="lego-card-header" style="background: #1E293B;">
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #F8FAFC;">
+          📝 Diário de Bordo da UFU
+        </h3>
+      </div>
+      <div class="lego-card-body" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+        {% for d in diarios %}
+          <div style="background: #0F172A; padding: 12px; border-radius: 8px; border-left: 3px solid #2563EB;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-bottom: 4px;">
+              <span>📅 {{ d.data.strftime('%d/%m/%Y') }}</span>
+              <span>✍️ {{ d.autor }}</span>
+            </div>
+            <h4 style="font-size: 0.92rem; font-weight: 800; color: #F8FAFC; margin-bottom: 4px;">
+              {{ d.titulo }}
+            </h4>
+            <p style="font-size: 0.82rem; color: #CBD5E1; line-height: 1.4; white-space: pre-line;">
+              {{ d.conteudo }}
+            </p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Entregas Recentes dos Alunos -->
+    <div class="lego-card">
+      <div class="lego-card-header" style="background: #1E293B;">
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #F8FAFC;">
+          🎯 Entregas Recentes dos Alunos
+        </h3>
+      </div>
+      <div class="lego-card-body" style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        {% for ent in entregas[:5] %}
+          <div style="background: #0F172A; padding: 10px; border-radius: 6px; border: 1px solid #334155;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-weight: 800; font-size: 0.82rem; color: #F8FAFC;">{{ ent.aluno.nome }}</span>
+              <span style="font-size: 0.72rem; font-weight: 800; background: {% if ent.status == 'aprovado' %}#065F46{% else %}#78350F{% endif %}; color: white; padding: 1px 6px; border-radius: 4px;">
+                {{ ent.status|upper }}
+              </span>
+            </div>
+            <div style="font-size: 0.78rem; color: #94A3B8;">{{ ent.atividade.titulo }}</div>
+            {% if ent.link_foto_video %}
+              <div style="margin-top: 4px;">
+                <a href="{{ ent.link_foto_video }}" target="_blank" style="color: #38BDF8; font-size: 0.75rem; text-decoration: none; font-weight: 700;">
+                  🔗 Ver fotos/vídeo do robô &rarr;
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
