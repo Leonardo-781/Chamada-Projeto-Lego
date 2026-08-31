@@ -13,7 +13,8 @@ def init_db(app):
 
 def migrar_colunas(app):
     try:
-        if 'sqlite' in db.engine.url.drivername:
+        driver = getattr(db.engine.url, 'drivername', '')
+        if 'sqlite' in driver:
             with db.engine.connect() as conn:
                 res = conn.execute(text("PRAGMA table_info(turmas)")).fetchall()
                 colunas_turmas = [r[1] for r in res]
@@ -32,6 +33,13 @@ def migrar_colunas(app):
                 if 'pin_acesso' not in colunas_alunos:
                     conn.execute(text("ALTER TABLE alunos ADD COLUMN pin_acesso TEXT DEFAULT '1234'"))
                     conn.commit()
+        else:
+            # PostgreSQL / Supabase
+            with db.engine.connect() as conn:
+                conn.execute(text("ALTER TABLE turmas ADD COLUMN IF NOT EXISTS anotacoes TEXT DEFAULT ''"))
+                conn.execute(text("ALTER TABLE sessoes_chamada ADD COLUMN IF NOT EXISTS proxima_aula TEXT DEFAULT ''"))
+                conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS pin_acesso VARCHAR(10) DEFAULT '1234'"))
+                conn.commit()
     except Exception as e:
         print(f"Aviso de migracao: {e}")
 

@@ -17,11 +17,24 @@ if db_url.startswith('postgres://'):
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+}
+
+if 'postgresql' in db_url:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS']['connect_args'] = {
+        'connect_timeout': 5,
+        'sslmode': 'require'
+    }
 
 db.init_app(app)
 
-# Inicializa banco de dados com dados iniciais
-init_db(app)
+# Inicializa banco de dados com dados iniciais e migrations
+try:
+    init_db(app)
+except Exception as e:
+    print(f"[Aviso Inicializacao DB]: {e}")
 
 
 # ==========================================
@@ -1057,6 +1070,29 @@ def exportar_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": f"attachment;filename={nome_arquivo}"}
     )
+
+
+@app.errorhandler(500)
+def erro_servidor(e):
+    return f"""
+    <div style="font-family: sans-serif; text-align: center; padding: 40px; background: #0F172A; color: white; min-height: 100vh;">
+      <h1 style="color: #EF4444; font-size: 2.5rem;">🧱 Ops! Erro Temporário de Conexão</h1>
+      <p style="color: #94A3B8; font-size: 1.1rem; max-width: 600px; margin: 16px auto;">
+        O servidor do banco de dados está sincronizando ou temporariamente indisponível.
+      </p>
+      <div style="background: #1E293B; padding: 16px; border-radius: 8px; max-width: 600px; margin: 20px auto; border: 1px solid #334155; text-align: left;">
+        <code style="color: #F59E0B; font-size: 0.9rem;">{str(e)}</code>
+      </div>
+      <a href="/" style="display: inline-block; background: #2563EB; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 16px;">
+        🔄 Recarregar Página
+      </a>
+    </div>
+    """, 500
+
+
+@app.errorhandler(404)
+def nao_encontrado(e):
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
