@@ -5,12 +5,12 @@
 {% block content %}
 
 <!-- Header do Aluno (Cartão do Construtor) -->
-<div class="lego-card" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border: 1.5px solid #334155; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);">
+<div class="hero-banner" style="margin-bottom: 24px;">
   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
     
     <!-- Info do Aluno -->
     <div style="display: flex; align-items: center; gap: 16px;">
-      <div class="avatar-lego {{ aluno.avatar_tipo }}" style="width: 68px; height: 68px; font-size: 2.2rem; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); border: 2px solid white;">
+      <div style="width: 64px; height: 64px; border-radius: 14px; background: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: 0 4px 12px rgba(37,99,235,0.4); border: 2px solid white;">
         {% if aluno.avatar_tipo == 'lego-ninja' %}🥷
         {% elif aluno.avatar_tipo == 'lego-astronaut' %}👨‍🚀
         {% elif aluno.avatar_tipo == 'lego-purple' %}🧙
@@ -23,24 +23,24 @@
 
       <div>
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <h2 style="font-size: 1.6rem; font-weight: 800; color: #F8FAFC;">
+          <h2 style="font-size: 1.55rem; font-weight: 900; color: #FFFFFF;">
             {{ aluno.nome }}
           </h2>
-          <span style="background: var(--lego-yellow-light); color: var(--lego-yellow-dark); padding: 3px 10px; border-radius: 20px; font-weight: 800; font-size: 0.82rem;">
+          <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #F59E0B; color: #FDE68A; padding: 3px 10px; border-radius: 20px; font-weight: 800; font-size: 0.82rem;">
             {{ aluno.info_nivel['badge'] }} Nível {{ aluno.info_nivel['nivel'] }}: {{ aluno.info_nivel['titulo'] }}
           </span>
         </div>
         
-        <p style="color: #94A3B8; font-size: 0.88rem; font-weight: 600; margin-top: 4px;">
+        <p style="color: #CBD5E1; font-size: 0.88rem; font-weight: 600; margin-top: 4px;">
           🏫 <strong>{{ aluno.turma.nome }}</strong> &bull; 👥 <strong>{{ aluno.equipe }}</strong>
         </p>
       </div>
     </div>
 
     <!-- Bloco de XP & Ações de Conta -->
-    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
       <div style="text-align: right;">
-        <div style="font-size: 1.8rem; font-weight: 900; color: var(--lego-yellow); text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);">
+        <div style="font-size: 1.8rem; font-weight: 900; color: #FBBF24; text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);">
           🧱 {{ aluno.pontos_xp }} XP
         </div>
         <div style="font-size: 0.78rem; color: #94A3B8; font-weight: 600;">
@@ -60,12 +60,12 @@
 
   </div>
 
-  <!-- Barra de Progresso de XP com Brilho -->
+  <!-- Barra de Progresso de XP -->
   <div style="margin-top: 20px;">
-    <div class="xp-bar" style="height: 12px; background: #334155; border-radius: 10px; overflow: hidden; border: 1px solid #475569;">
-      <div class="xp-bar-fill" style="width: {{ aluno.info_nivel['progresso'] }}%; height: 100%; background: linear-gradient(90deg, #F59E0B, #FBBF24); box-shadow: 0 0 12px #F59E0B; transition: width 0.8s ease;"></div>
+    <div style="height: 10px; background: #334155; border-radius: 10px; overflow: hidden; border: 1px solid #475569;">
+      <div style="width: {{ aluno.info_nivel['progresso'] }}%; height: 100%; background: linear-gradient(90deg, #F59E0B, #FBBF24); box-shadow: 0 0 10px #F59E0B; transition: width 0.8s ease;"></div>
     </div>
-    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #94A3B8; margin-top: 6px; font-weight: 600;">
+    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #CBD5E1; margin-top: 6px; font-weight: 600;">
       <span>Progresso do Nível: {{ aluno.info_nivel['progresso'] }}%</span>
       <span>Faltam {{ [aluno.info_nivel['proximo_xp'] - aluno.pontos_xp, 0]|max }} XP para o próximo nível</span>
     </div>
@@ -73,15 +73,15 @@
 </div>
 
 <!-- Abas de Navegação do Aluno -->
-<div style="display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #334155; padding-bottom: 12px; flex-wrap: wrap;">
-  <button type="button" class="btn-lego btn-yellow btn-tab-view active" id="tabBtnStudentSlides" onclick="switchStudentTab('slides')">
-    <span>📑</span> Slides & Materiais de Aula ({{ slides|length }})
+<div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #E2E8F0; padding-bottom: 12px; flex-wrap: wrap;">
+  <button type="button" class="btn-lego btn-blue btn-tab-view active" id="tabBtnStudentSlides" onclick="switchStudentTab('slides')">
+    <span>📑</span> Slides & Materiais ({{ slides|length }})
   </button>
   <button type="button" class="btn-lego btn-gray btn-tab-view" id="tabBtnStudentDesafios" onclick="switchStudentTab('desafios')">
     <span>🎯</span> Meus Desafios & Entregas ({{ atividades|length }})
   </button>
   <button type="button" class="btn-lego btn-gray btn-tab-view" id="tabBtnStudentDuvidas" onclick="switchStudentTab('duvidas')">
-    <span>💬</span> Fórum & Minhas Dúvidas ({{ minhas_duvidas|length }})
+    <span>💬</span> Fórum & Dúvidas ({{ minhas_duvidas|length }})
   </button>
   <button type="button" class="btn-lego btn-gray btn-tab-view" id="tabBtnStudentMedalhas" onclick="switchStudentTab('medalhas')">
     <span>🏆</span> Minhas Medalhas ({{ conquistas|length }})
@@ -94,61 +94,61 @@
      ========================================== -->
 <div id="tabStudentSlides">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h3 style="font-size: 1.25rem; font-weight: 800; color: #F8FAFC;">
+    <h3 style="font-size: 1.25rem; font-weight: 800; color: #0F172A;">
       📑 Materiais de Estudo & Manuais de Montagem
     </h3>
-    <span style="font-size: 0.85rem; color: #94A3B8; font-weight: 600;">{{ slides|length }} materiais disponíveis</span>
+    <span style="font-size: 0.85rem; color: #64748B; font-weight: 600;">{{ slides|length }} materiais disponíveis</span>
   </div>
 
   {% if slides|length == 0 %}
     <div class="lego-card" style="text-align: center; padding: 40px;">
       <div style="font-size: 3rem;">📑</div>
-      <h3 style="margin: 12px 0;">Nenhum material publicado ainda</h3>
-      <p style="color: #94A3B8;">O professor publicará apresentações e manuais aqui em breve.</p>
+      <h3 style="margin: 12px 0; color: #0F172A;">Nenhum material publicado ainda</h3>
+      <p style="color: #64748B;">O professor publicará apresentações e manuais aqui em breve.</p>
     </div>
   {% endif %}
 
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
     {% for s in slides %}
-      <div class="lego-card" style="display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #334155;">
+      <div class="lego-card" style="display: flex; flex-direction: column; justify-content: space-between;">
         <div>
-          <div class="lego-card-header" style="background: #1E293B; border-bottom: 1px solid #334155;">
+          <div class="lego-card-header">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-              <span style="font-size: 0.8rem; font-weight: 800; background: #0F172A; color: #94A3B8; padding: 3px 8px; border-radius: 6px; border: 1px solid #334155;">
+              <span style="font-size: 0.8rem; font-weight: 800; background: #0F172A; color: #FFFFFF; padding: 3px 8px; border-radius: 6px;">
                 AULA {{ s.numero_aula }}
               </span>
 
               {% if s.tipo == 'slides' %}
                 <span style="font-size: 0.75rem; font-weight: 700; background: #FEF3C7; color: #92400E; padding: 3px 8px; border-radius: 6px;">
-                  🖥️ Apresentação de Slides
+                  🖥️ Slides
                 </span>
               {% elif s.tipo == 'manual_montagem' %}
                 <span style="font-size: 0.75rem; font-weight: 700; background: #DBEAFE; color: #1E40AF; padding: 3px 8px; border-radius: 6px;">
-                  📖 Manual de Montagem
+                  📖 Manual
                 </span>
               {% elif s.tipo == 'video_tutorial' %}
                 <span style="font-size: 0.75rem; font-weight: 700; background: #FEE2E2; color: #991B1B; padding: 3px 8px; border-radius: 6px;">
-                  🎥 Vídeo Tutorial
+                  🎥 Vídeo
                 </span>
               {% else %}
                 <span style="font-size: 0.75rem; font-weight: 700; background: #D1FAE5; color: #065F46; padding: 3px 8px; border-radius: 6px;">
-                  💻 Guia de Programação
+                  💻 Guia de Código
                 </span>
               {% endif %}
             </div>
           </div>
 
-          <div class="lego-card-body" style="padding: 16px;">
-            <h4 style="font-size: 1.1rem; font-weight: 800; color: #F8FAFC; margin-bottom: 8px;">
+          <div class="lego-card-body" style="padding: 18px;">
+            <h4 style="font-size: 1.05rem; font-weight: 800; color: #0F172A; margin-bottom: 8px;">
               {{ s.titulo }}
             </h4>
-            <p style="font-size: 0.88rem; color: #94A3B8; line-height: 1.45; margin-bottom: 14px;">
+            <p style="font-size: 0.86rem; color: #64748B; line-height: 1.45; margin-bottom: 14px;">
               {{ s.descricao or 'Material de estudo para acompanhamento remoto das oficinas Lego.' }}
             </p>
           </div>
         </div>
 
-        <div style="padding: 12px 16px; background: #0F172A; border-top: 1px solid #334155;">
+        <div class="lego-card-footer">
           <a href="{{ s.link_slide }}" target="_blank" class="btn-lego btn-blue" style="width: 100%; justify-content: center;">
             <span>🌐</span> Abrir Material de Aula &rarr;
           </a>
@@ -164,62 +164,62 @@
      ========================================== -->
 <div id="tabStudentDesafios" style="display: none;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h3 style="font-size: 1.25rem; font-weight: 800; color: #F8FAFC;">
+    <h3 style="font-size: 1.25rem; font-weight: 800; color: #0F172A;">
       🎯 Desafios Práticos da Turma
     </h3>
-    <span style="font-size: 0.85rem; color: #94A3B8; font-weight: 600;">Submeta fotos ou vídeos do seu robô</span>
+    <span style="font-size: 0.85rem; color: #64748B; font-weight: 600;">Submeta fotos ou vídeos do seu robô</span>
   </div>
 
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;">
     {% for ativ in atividades %}
       {% set minha_entrega = entregas_dict.get(ativ.id) %}
-      <div class="lego-card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 6px solid var(--lego-yellow);">
+      <div class="lego-card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid #2563EB;">
         <div>
-          <div class="lego-card-header" style="background: #1E293B; border-bottom: 1px solid #334155;">
+          <div class="lego-card-header">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-              <span style="font-size: 0.8rem; font-weight: 800; color: #94A3B8;">
+              <span style="font-size: 0.8rem; font-weight: 800; color: #64748B;">
                 🤖 {{ ativ.kit_lego }}
               </span>
-              <span style="font-size: 0.85rem; font-weight: 800; color: #F59E0B; background: #78350F40; padding: 3px 8px; border-radius: 6px; border: 1px solid #F59E0B60;">
+              <span style="font-size: 0.85rem; font-weight: 800; color: #D97706; background: #FFFBEB; padding: 3px 8px; border-radius: 6px;">
                 ⭐ +{{ ativ.xp_recompensa }} XP
               </span>
             </div>
           </div>
 
-          <div class="lego-card-body" style="padding: 16px;">
-            <h4 style="font-size: 1.15rem; font-weight: 800; color: #F8FAFC; margin-bottom: 8px;">
+          <div class="lego-card-body" style="padding: 18px;">
+            <h4 style="font-size: 1.1rem; font-weight: 800; color: #0F172A; margin-bottom: 8px;">
               {{ ativ.titulo }}
             </h4>
-            <p style="font-size: 0.88rem; color: #CBD5E1; line-height: 1.45; margin-bottom: 14px; white-space: pre-line;">
+            <p style="font-size: 0.86rem; color: #334155; line-height: 1.45; margin-bottom: 14px; white-space: pre-line;">
               {{ ativ.descricao }}
             </p>
 
-            <div style="background: #0F172A; padding: 10px; border-radius: 8px; font-size: 0.8rem; border: 1px solid #334155; margin-bottom: 12px;">
+            <div style="background: #F8FAFC; padding: 10px 12px; border-radius: 8px; font-size: 0.8rem; border: 1px solid #E2E8F0; margin-bottom: 12px; color: #334155;">
               📅 <strong>Prazo:</strong> {{ ativ.data_limite.strftime('%d/%m/%Y') if ativ.data_limite else 'Sem prazo limite' }}
             </div>
 
             <!-- Status da Entrega do Aluno -->
             {% if minha_entrega %}
-              <div style="background: #1E293B; padding: 12px; border-radius: 8px; border-left: 4px solid {% if minha_entrega.status == 'aprovado' %}#10B981{% elif minha_entrega.status == 'revisar' %}#F59E0B{% else %}#3B82F6{% endif %};">
+              <div style="background: #F8FAFC; padding: 12px; border-radius: 8px; border-left: 4px solid {% if minha_entrega.status == 'aprovado' %}#10B981{% elif minha_entrega.status == 'revisar' %}#F59E0B{% else %}#3B82F6{% endif %}; border: 1px solid #E2E8F0; border-left-width: 4px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <span style="font-weight: 800; font-size: 0.85rem; color: #F8FAFC;">Minha Entrega:</span>
+                  <span style="font-weight: 800; font-size: 0.85rem; color: #0F172A;">Minha Entrega:</span>
                   {% if minha_entrega.status == 'aprovado' %}
-                    <span style="background: #065F46; color: #D1FAE5; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.75rem;">
+                    <span style="background: #ECFDF5; color: #059669; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.75rem;">
                       ✅ Aprovado (+{{ minha_entrega.xp_concedido }} XP)
                     </span>
                   {% elif minha_entrega.status == 'revisar' %}
-                    <span style="background: #78350F; color: #FEF3C7; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.75rem;">
+                    <span style="background: #FFFBEB; color: #D97706; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.75rem;">
                       ⚠️ Precisa de Ajustes
                     </span>
                   {% else %}
-                    <span style="background: #1E3A8A; color: #DBEAFE; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.75rem;">
+                    <span style="background: #EFF6FF; color: #2563EB; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.75rem;">
                       ⏳ Aguardando Avaliação
                     </span>
                   {% endif %}
                 </div>
 
                 {% if minha_entrega.feedback_professor %}
-                  <p style="font-size: 0.8rem; color: #E2E8F0; margin-top: 6px;">
+                  <p style="font-size: 0.82rem; color: #334155; margin-top: 6px;">
                     👨‍🏫 <strong>Feedback:</strong> <em>"{{ minha_entrega.feedback_professor }}"</em>
                   </p>
                 {% endif %}
@@ -229,7 +229,7 @@
           </div>
         </div>
 
-        <div style="padding: 12px 16px; background: #0F172A; border-top: 1px solid #334155;">
+        <div class="lego-card-footer">
           <button type="button" class="btn-lego {% if minha_entrega %}btn-gray{% else %}btn-green{% endif %}" style="width: 100%; justify-content: center;" onclick="abrirModalEnviarEntregaAluno({{ ativ.id }}, '{{ ativ.titulo }}')">
             <span>📤</span> {% if minha_entrega %}Reenviar Solução{% else %}Enviar Foto / Vídeo do Robô{% endif %}
           </button>
@@ -246,12 +246,12 @@
 <div id="tabStudentDuvidas" style="display: none;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
     <div>
-      <h3 style="font-size: 1.25rem; font-weight: 800; color: #F8FAFC;">
+      <h3 style="font-size: 1.25rem; font-weight: 800; color: #0F172A;">
         💬 Minhas Dúvidas & Suporte Técnico
       </h3>
-      <p style="font-size: 0.85rem; color: #94A3B8;">Tire dúvidas sobre sensores, montagem ou lógica com o seu professor</p>
+      <p style="font-size: 0.85rem; color: #64748B;">Tire dúvidas sobre sensores, montagem ou lógica com o seu professor</p>
     </div>
-    <button type="button" class="btn-lego btn-yellow" onclick="openModal('modalNovaDuvidaAluno')">
+    <button type="button" class="btn-lego btn-blue" onclick="openModal('modalNovaDuvidaAluno')">
       <span>❓</span> Fazer Pergunta
     </button>
   </div>
@@ -259,49 +259,43 @@
   {% if minhas_duvidas|length == 0 %}
     <div class="lego-card" style="text-align: center; padding: 40px;">
       <div style="font-size: 3rem;">💬</div>
-      <h3 style="margin: 12px 0;">Você ainda não postou nenhuma dúvida</h3>
-      <p style="color: #94A3B8; margin-bottom: 16px;">Precisa de ajuda com a calibração de um sensor ou montagem de engrenagens?</p>
-      <button type="button" class="btn-lego btn-yellow" onclick="openModal('modalNovaDuvidaAluno')">Postar Dúvida</button>
+      <h3 style="margin: 12px 0; color: #0F172A;">Você ainda não postou nenhuma dúvida</h3>
+      <p style="color: #64748B; margin-bottom: 16px;">Precisa de ajuda com a calibração de um sensor ou montagem de engrenagens?</p>
+      <button type="button" class="btn-lego btn-blue" onclick="openModal('modalNovaDuvidaAluno')">Postar Dúvida</button>
     </div>
   {% endif %}
 
   <div style="display: flex; flex-direction: column; gap: 16px;">
     {% for d in minhas_duvidas %}
-      <div class="lego-card" style="border: 1px solid #334155;">
+      <div class="lego-card">
         <div class="lego-card-body" style="padding: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-            <span style="font-size: 0.8rem; font-weight: 700; color: #94A3B8; background: #0F172A; padding: 3px 8px; border-radius: 6px;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: #64748B; background: #F1F5F9; padding: 3px 8px; border-radius: 6px;">
               🏷️ {{ d.categoria }}
             </span>
             {% if d.status == 'resolvida' %}
-              <span style="background: #065F46; color: #D1FAE5; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">
-                🟢 Resolvida
-              </span>
+              <span class="badge badge-green">🟢 Resolvida</span>
             {% elif d.status == 'respondida' %}
-              <span style="background: #1E3A8A; color: #DBEAFE; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">
-                💬 Respondida pelo Professor
-              </span>
+              <span class="badge badge-blue">💬 Respondida pelo Professor</span>
             {% else %}
-              <span style="background: #78350F; color: #FEF3C7; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.78rem;">
-                ⏳ Aguardando Resposta
-              </span>
+              <span class="badge badge-yellow">⏳ Aguardando Resposta</span>
             {% endif %}
           </div>
 
-          <h4 style="font-size: 1.1rem; font-weight: 800; color: #F8FAFC; margin-bottom: 8px;">
+          <h4 style="font-size: 1.05rem; font-weight: 800; color: #0F172A; margin-bottom: 8px;">
             {{ d.titulo }}
           </h4>
-          <p style="font-size: 0.9rem; color: #CBD5E1; margin-bottom: 14px; white-space: pre-line;">
+          <p style="font-size: 0.88rem; color: #334155; margin-bottom: 14px; white-space: pre-line;">
             {{ d.pergunta }}
           </p>
 
           <!-- Resposta do Professor -->
           {% if d.resposta_professor %}
-            <div style="background: #0F172A; border-left: 4px solid var(--lego-blue); padding: 14px; border-radius: 8px; border: 1px solid #334155; border-left-width: 4px;">
-              <div style="font-size: 0.85rem; font-weight: 800; color: #60A5FA; margin-bottom: 6px;">
+            <div style="background: #F8FAFC; border-left: 4px solid #2563EB; padding: 14px; border-radius: 8px; border: 1px solid #E2E8F0; border-left-width: 4px;">
+              <div style="font-size: 0.82rem; font-weight: 800; color: #2563EB; margin-bottom: 4px;">
                 👨‍🏫 Resposta do Professor ({{ d.respondido_por }}):
               </div>
-              <p style="font-size: 0.88rem; color: #F1F5F9; white-space: pre-line;">
+              <p style="font-size: 0.86rem; color: #0F172A; white-space: pre-line;">
                 {{ d.resposta_professor }}
               </p>
             </div>
@@ -318,23 +312,23 @@
      ========================================== -->
 <div id="tabStudentMedalhas" style="display: none;">
   <div style="margin-bottom: 16px;">
-    <h3 style="font-size: 1.25rem; font-weight: 800; color: #F8FAFC;">
+    <h3 style="font-size: 1.25rem; font-weight: 800; color: #0F172A;">
       🏆 Galeria de Conquistas & Medalhas
     </h3>
-    <p style="font-size: 0.85rem; color: #94A3B8;">Medalhas desbloqueadas por presença e excelência na robótica</p>
+    <p style="font-size: 0.85rem; color: #64748B;">Medalhas desbloqueadas por presença e excelência na robótica</p>
   </div>
 
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
     {% for c in conquistas %}
-      <div class="lego-card" style="border: 1px solid #334155; display: flex; align-items: center; gap: 14px; padding: 16px;">
-        <div style="font-size: 2.5rem; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4));">
+      <div class="lego-card" style="display: flex; align-items: center; gap: 14px; padding: 16px;">
+        <div style="font-size: 2.4rem;">
           {{ c.medalha.icone }}
         </div>
         <div>
-          <div style="font-weight: 800; font-size: 1rem; color: #F8FAFC;">{{ c.medalha.nome }}</div>
-          <div style="font-size: 0.8rem; color: #94A3B8; margin: 2px 0;">{{ c.medalha.descricao }}</div>
-          <div style="font-size: 0.75rem; font-weight: 800; color: var(--lego-yellow);">
-            ⭐ +{{ c.medalha.xp_bonus }} XP &bull; Conquistada em {{ c.data_conquista.strftime('%d/%m/%Y') }}
+          <div style="font-weight: 800; font-size: 0.95rem; color: #0F172A;">{{ c.medalha.nome }}</div>
+          <div style="font-size: 0.8rem; color: #64748B; margin: 2px 0;">{{ c.medalha.descricao }}</div>
+          <div style="font-size: 0.76rem; font-weight: 800; color: #D97706;">
+            ⭐ +{{ c.medalha.xp_bonus }} XP &bull; {{ c.data_conquista.strftime('%d/%m/%Y') }}
           </div>
         </div>
       </div>
@@ -345,38 +339,35 @@
 
 <!-- MODAL: ENVIAR ENTREGA (ALUNO) -->
 <div id="modalEnviarEntregaAluno" class="modal-backdrop">
-  <div class="modal-content" style="background: #1E293B; border: 1px solid #334155;">
-    <div class="modal-header" style="background: #0284C7;">
+  <div class="modal-content">
+    <div class="modal-header">
       <h3>📤 Enviar Foto / Vídeo do Robô</h3>
       <button type="button" class="modal-close" onclick="closeModal('modalEnviarEntregaAluno')">&times;</button>
     </div>
     <form onsubmit="submeterEntregaPeloAluno(event)">
       <input type="hidden" id="modalEntregaAtividadeId" name="atividade_id">
       <div class="modal-body">
-        <p style="margin-bottom: 12px; color: #CBD5E1; font-size: 0.9rem;">
-          Enviando solução para o desafio: <strong id="modalEntregaAtividadeTitulo" style="color: #F8FAFC;"></strong>
+        <p style="margin-bottom: 12px; color: #334155; font-size: 0.88rem;">
+          Enviando solução para o desafio: <strong id="modalEntregaAtividadeTitulo" style="color: #0F172A;"></strong>
         </p>
 
         <div style="display: flex; flex-direction: column; gap: 14px;">
           <div>
-            <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; display: block; margin-bottom: 4px;">
+            <label style="font-weight: 700; font-size: 0.8rem; color: #334155; display: block; margin-bottom: 4px;">
               Link da Foto ou Vídeo de Teste do Robô:
             </label>
-            <input type="url" name="link_foto_video" class="input-lego" placeholder="Link do Google Drive, Fotos, YouTube..." required style="background: #0F172A; border-color: #334155; color: #F8FAFC;">
-            <p style="font-size: 0.75rem; color: #94A3B8; margin-top: 4px;">
-              💡 <em>Você pode subir o vídeo ou fotos no Google Drive / Fotos e colar o link aqui.</em>
-            </p>
+            <input type="url" name="link_foto_video" class="input-lego" placeholder="https://drive.google.com/..." required>
           </div>
 
           <div>
-            <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; display: block; margin-bottom: 4px;">
+            <label style="font-weight: 700; font-size: 0.8rem; color: #334155; display: block; margin-bottom: 4px;">
               Explique como você/sua equipe montou e programou:
             </label>
-            <textarea name="descricao_solucao" class="input-lego" rows="3" placeholder="Descreva quais motores, engrenagens e blocos de código utilizaram..." required style="background: #0F172A; border-color: #334155; color: #F8FAFC;"></textarea>
+            <textarea name="descricao_solucao" class="input-lego" rows="3" placeholder="Descreva motores, engrenagens e programação..." required></textarea>
           </div>
         </div>
       </div>
-      <div class="modal-footer" style="background: #0F172A; border-top: 1px solid #334155;">
+      <div class="modal-footer">
         <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalEnviarEntregaAluno')">Cancelar</button>
         <button type="submit" class="btn-lego btn-green">Enviar para Avaliação</button>
       </div>
@@ -387,8 +378,8 @@
 
 <!-- MODAL: NOVA DÚVIDA DO ALUNO -->
 <div id="modalNovaDuvidaAluno" class="modal-backdrop">
-  <div class="modal-content" style="background: #1E293B; border: 1px solid #334155;">
-    <div class="modal-header" style="background: var(--lego-yellow-dark);">
+  <div class="modal-content">
+    <div class="modal-header">
       <h3>❓ Enviar Pergunta ao Professor</h3>
       <button type="button" class="modal-close" onclick="closeModal('modalNovaDuvidaAluno')">&times;</button>
     </div>
@@ -396,29 +387,29 @@
       <div class="modal-body">
         <div style="display: flex; flex-direction: column; gap: 14px;">
           <div>
-            <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; display: block; margin-bottom: 4px;">Categoria:</label>
-            <select name="categoria" class="input-lego" style="background: #0F172A; border-color: #334155; color: #F8FAFC;">
+            <label style="font-weight: 700; font-size: 0.8rem; color: #334155; display: block; margin-bottom: 4px;">Categoria:</label>
+            <select name="categoria" class="input-lego">
               <option value="Programação & Sensores">🤖 Programação & Sensores</option>
-              <option value="Montagem / Mecânica">⚙️ Montagem & Mecânica (Engrenagens, Estruturas)</option>
-              <option value="Peças & Kits">📦 Peças & Kits Lego</option>
+              <option value="Montagem / Mecânica">⚙️ Montagem & Mecânica</option>
+              <option value="Peças & Kits">📦 Peças & Kits</option>
               <option value="Geral">💡 Geral / Desafios</option>
             </select>
           </div>
 
           <div>
-            <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; display: block; margin-bottom: 4px;">Título da Dúvida:</label>
-            <input type="text" name="titulo" class="input-lego" placeholder="Ex: Como fazer o robô girar 90 graus exatos?" required style="background: #0F172A; border-color: #334155; color: #F8FAFC;">
+            <label style="font-weight: 700; font-size: 0.8rem; color: #334155; display: block; margin-bottom: 4px;">Título da Dúvida:</label>
+            <input type="text" name="titulo" class="input-lego" placeholder="Ex: Como fazer o robô girar 90 graus exatos?" required>
           </div>
 
           <div>
-            <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; display: block; margin-bottom: 4px;">Detalhes da sua pergunta:</label>
-            <textarea name="pergunta" class="input-lego" rows="4" placeholder="Explique onde você teve dificuldade..." required style="background: #0F172A; border-color: #334155; color: #F8FAFC;"></textarea>
+            <label style="font-weight: 700; font-size: 0.8rem; color: #334155; display: block; margin-bottom: 4px;">Detalhes da sua pergunta:</label>
+            <textarea name="pergunta" class="input-lego" rows="4" placeholder="Explique onde você teve dificuldade..." required></textarea>
           </div>
         </div>
       </div>
-      <div class="modal-footer" style="background: #0F172A; border-top: 1px solid #334155;">
+      <div class="modal-footer">
         <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalNovaDuvidaAluno')">Cancelar</button>
-        <button type="submit" class="btn-lego btn-yellow">Publicar Pergunta</button>
+        <button type="submit" class="btn-lego btn-blue">Publicar Pergunta</button>
       </div>
     </form>
   </div>
@@ -427,19 +418,19 @@
 
 <!-- MODAL: ALTERAR PIN DO ALUNO -->
 <div id="modalAlterarPin" class="modal-backdrop">
-  <div class="modal-content" style="background: #1E293B; border: 1px solid #334155; max-width: 400px;">
-    <div class="modal-header" style="background: #475569;">
+  <div class="modal-content" style="max-width: 400px;">
+    <div class="modal-header">
       <h3>🔑 Trocar meu PIN de Acesso</h3>
       <button type="button" class="modal-close" onclick="closeModal('modalAlterarPin')">&times;</button>
     </div>
     <form onsubmit="salvarNovoPinAluno(event)">
       <div class="modal-body">
-        <label style="font-weight: 700; font-size: 0.82rem; color: #CBD5E1; display: block; margin-bottom: 6px;">
+        <label style="font-weight: 700; font-size: 0.8rem; color: #334155; display: block; margin-bottom: 6px;">
           Digite o novo PIN (4 a 8 dígitos):
         </label>
-        <input type="password" id="inputNovoPin" class="input-lego" placeholder="••••" maxlength="8" required style="background: #0F172A; border-color: #334155; color: #F8FAFC; font-size: 1.2rem; text-align: center; letter-spacing: 4px;">
+        <input type="password" id="inputNovoPin" class="input-lego" placeholder="••••" maxlength="8" required style="font-size: 1.2rem; text-align: center; letter-spacing: 4px;">
       </div>
-      <div class="modal-footer" style="background: #0F172A; border-top: 1px solid #334155;">
+      <div class="modal-footer">
         <button type="button" class="btn-lego btn-gray" onclick="closeModal('modalAlterarPin')">Cancelar</button>
         <button type="submit" class="btn-lego btn-green">Salvar Novo PIN</button>
       </div>
@@ -459,7 +450,7 @@
       if (t === tab) {
         if (el) el.style.display = 'block';
         if (btn) {
-          btn.className = 'btn-lego btn-yellow btn-tab-view active';
+          btn.className = 'btn-lego btn-blue btn-tab-view active';
         }
       } else {
         if (el) el.style.display = 'none';
@@ -496,15 +487,14 @@
       });
       const data = await res.json();
       if (data.success) {
-        triggerLegoConfetti();
-        showToast(data.message, 'success');
+        if (typeof showToast === 'function') showToast(data.message, 'success');
         closeModal('modalEnviarEntregaAluno');
-        setTimeout(() => location.reload(), 800);
+        setTimeout(() => location.reload(), 600);
       } else {
-        showToast(data.error || 'Erro ao enviar entrega.', 'error');
+        alert(data.error || 'Erro ao enviar entrega.');
       }
     } catch (err) {
-      showToast('Erro ao comunicar com o servidor.', 'error');
+      alert('Erro ao comunicar com o servidor.');
     }
   }
 
@@ -528,14 +518,14 @@
       });
       const data = await res.json();
       if (data.success) {
-        showToast(data.message, 'success');
+        if (typeof showToast === 'function') showToast(data.message, 'success');
         closeModal('modalNovaDuvidaAluno');
         setTimeout(() => location.reload(), 600);
       } else {
-        showToast(data.error || 'Erro ao postar dúvida.', 'error');
+        alert(data.error || 'Erro ao postar dúvida.');
       }
     } catch (err) {
-      showToast('Erro ao comunicar com o servidor.', 'error');
+      alert('Erro ao comunicar com o servidor.');
     }
   }
 
@@ -550,13 +540,13 @@
       });
       const data = await res.json();
       if (data.success) {
-        showToast(data.message, 'success');
+        if (typeof showToast === 'function') showToast(data.message, 'success');
         closeModal('modalAlterarPin');
       } else {
-        showToast(data.error || 'Erro ao alterar PIN.', 'error');
+        alert(data.error || 'Erro ao alterar PIN.');
       }
     } catch (err) {
-      showToast('Erro ao comunicar com o servidor.', 'error');
+      alert('Erro ao comunicar com o servidor.');
     }
   }
 </script>

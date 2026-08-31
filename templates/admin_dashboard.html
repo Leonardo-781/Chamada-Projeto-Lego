@@ -1,90 +1,106 @@
 {% extends 'base.html' %}
 
-{% block title %}Painel Master de Controle - Robótica UFU / MONTE BOT{% endblock %}
+{% block title %}Painel de Controle Master - Robótica UFU / MONTE BOT{% endblock %}
 
 {% block content %}
 
-<!-- Header Master -->
-<div class="lego-card" style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border: 1.5px solid #334155; padding: 24px; margin-bottom: 24px;">
+<!-- Hero Banner Institucional -->
+<div class="hero-banner">
   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div>
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-        <span style="background: #D97706; color: white; font-size: 0.75rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">
-          👑 Acesso Master - Coordenação
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="background: #D97706; color: white; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase;">
+          👑 Coordenação UFU &bull; MONTE BOT
         </span>
-        <span style="color: #94A3B8; font-size: 0.82rem;">UFU &bull; FACOM &bull; LINA &bull; MONTE BOT</span>
+        <span style="color: #94A3B8; font-size: 0.82rem;">Laboratório LINA / FACOM</span>
       </div>
-      <h2 style="font-size: 1.6rem; font-weight: 800; color: #F8FAFC;">
+      <h2 style="font-size: 1.65rem; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em;">
         Central de Operações do Laboratório
       </h2>
-      <p style="color: #94A3B8; font-size: 0.88rem; margin-top: 2px;">
-        Controle total de presenças, pontuações de XP, desafios práticos e avaliação de protótipos
+      <p style="color: #CBD5E1; font-size: 0.9rem; margin-top: 2px;">
+        Gestão de presenças, pontuações de XP, desafios práticos e avaliação de protótipos
       </p>
     </div>
 
     <!-- Botões de Ação Imediata -->
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-      <a href="{{ url_for('chamada') }}" class="btn-lego btn-blue">
-        <span>📋</span> Lançar Chamada Hoje
+      <a href="{{ url_for('chamada') }}" class="btn-lego btn-blue" style="padding: 10px 18px; font-size: 0.9rem;">
+        <span>📋</span> Lançar Chamada
       </a>
-      <a href="{{ url_for('atividades_page') }}" class="btn-lego btn-yellow">
+      <a href="{{ url_for('atividades_page') }}" class="btn-lego btn-yellow" style="padding: 10px 18px; font-size: 0.9rem;">
         <span>🎯</span> Criar / Avaliar Desafio
       </a>
-      <a href="{{ url_for('anotacoes_page') }}" class="btn-lego btn-green">
+      <a href="{{ url_for('anotacoes_page') }}" class="btn-lego btn-green" style="padding: 10px 18px; font-size: 0.9rem;">
         <span>📝</span> Diário de Bordo
       </a>
     </div>
   </div>
 </div>
 
-<!-- Métricas de Desempenho -->
-<div class="stats-grid" style="margin-bottom: 24px;">
+<!-- Métricas de Desempenho (Stats Grid com Cores Vivas) -->
+<div class="stats-grid">
+  
   <div class="stat-card" style="border-left: 4px solid #2563EB;">
-    <div class="stat-icon">👥</div>
+    <div class="stat-icon-box" style="background: #EFF6FF; color: #2563EB;">
+      👥
+    </div>
     <div>
-      <div class="stat-value">{{ total_alunos }}</div>
-      <div class="stat-label">Alunos Ativos</div>
+      <div class="stat-number">{{ total_alunos }}</div>
+      <div class="stat-title">Alunos Ativos</div>
     </div>
   </div>
 
   <div class="stat-card" style="border-left: 4px solid #059669;">
-    <div class="stat-icon">📋</div>
+    <div class="stat-icon-box" style="background: #ECFDF5; color: #059669;">
+      📋
+    </div>
     <div>
-      <div class="stat-value">{{ total_chamadas }}</div>
-      <div class="stat-label">Oficinas Realizadas</div>
+      <div class="stat-number">{{ total_chamadas }}</div>
+      <div class="stat-title">Oficinas Realizadas</div>
     </div>
   </div>
 
-  <div class="stat-card" style="border-left: 4px solid #F59E0B;">
-    <div class="stat-icon">🎯</div>
+  <div class="stat-card" style="border-left: 4px solid #D97706;">
+    <div class="stat-icon-box" style="background: #FFFBEB; color: #D97706;">
+      🎯
+    </div>
     <div>
-      <div class="stat-value">{{ total_atividades }}</div>
-      <div class="stat-label">Desafios Publicados</div>
+      <div class="stat-number">{{ total_atividades }}</div>
+      <div class="stat-title">Desafios Publicados</div>
     </div>
   </div>
 
   <div class="stat-card" style="border-left: 4px solid #7C3AED;">
-    <div class="stat-icon">💬</div>
+    <div class="stat-icon-box" style="background: #F5F3FF; color: #7C3AED;">
+      💬
+    </div>
     <div>
-      <div class="stat-value">{{ total_duvidas }}</div>
-      <div class="stat-label">Tópicos no Fórum</div>
+      <div class="stat-number">{{ total_duvidas }}</div>
+      <div class="stat-title">Tópicos no Fórum</div>
     </div>
   </div>
+
 </div>
 
-<!-- Grid de Turmas e Bancadas -->
-<div style="margin-bottom: 30px;">
+<!-- Bancadas & Turmas de Robótica -->
+<div style="margin-bottom: 34px;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h3 style="font-size: 1.25rem; font-weight: 800; color: #F8FAFC;">
-      🏫 Bancadas & Turmas de Robótica
-    </h3>
-    <span style="font-size: 0.85rem; color: #94A3B8;">3 turmas estruturadas</span>
+    <div>
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: #0F172A;">
+        🏫 Bancadas & Turmas de Robótica
+      </h3>
+      <p style="font-size: 0.85rem; color: #64748B;">Selecione uma bancada para realizar a chamada ou ver o histórico</p>
+    </div>
+    <span style="font-size: 0.85rem; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 4px 12px; border-radius: 20px;">
+      3 Turmas Ativas
+    </span>
   </div>
 
   <div class="class-cards-grid">
     {% for turma in turmas %}
-      <div class="lego-card class-card" style="border-top: 6px solid {{ turma.cor_tema }};">
-        <div class="lego-card-header">
+      <div class="class-card" style="border-top: 4px solid {{ turma.cor_tema }};">
+        
+        <div class="lego-card-header" style="background: #FFFFFF;">
           <div>
             <div class="class-title">{{ turma.nome }}</div>
             <div class="class-code">{{ turma.codigo }}</div>
@@ -94,32 +110,32 @@
           </span>
         </div>
 
-        <div class="lego-card-body">
+        <div class="lego-card-body" style="background: #FFFFFF;">
           <p class="class-description">{{ turma.descricao }}</p>
           
-          <div class="class-meta">
+          <div class="class-meta" style="margin-bottom: 14px;">
             <div class="meta-item">
-              <span class="meta-icon">⏰</span>
-              <span>{{ turma.horario or 'Horário a definir' }}</span>
+              <span>⏰</span>
+              <span><strong>Horário:</strong> {{ turma.horario or 'A definir' }}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-icon">👥</span>
+              <span>👥</span>
               <span><strong>{{ turma.total_alunos }}</strong> alunos matriculados</span>
             </div>
             <div class="meta-item">
-              <span class="meta-icon">🎯</span>
-              <span><strong>{{ turma.total_atividades }}</strong> desafios ativos</span>
+              <span>🎯</span>
+              <span><strong>{{ turma.total_atividades }}</strong> desafios práticos</span>
             </div>
           </div>
 
           {% if turma.anotacoes %}
-            <div style="background: #0F172A; padding: 10px; border-radius: 6px; font-size: 0.75rem; color: #CBD5E1; margin: 10px 0; border: 1px solid #334155; white-space: pre-line;">
+            <div style="background: #F8FAFC; padding: 12px; border-radius: 8px; font-size: 0.78rem; color: #334155; border: 1px solid #E2E8F0; white-space: pre-line;">
               {{ turma.anotacoes }}
             </div>
           {% endif %}
         </div>
 
-        <div class="lego-card-footer" style="display: flex; gap: 8px;">
+        <div class="lego-card-footer" style="display: flex; gap: 8px; background: #F8FAFC;">
           <a href="{{ url_for('chamada', turma_id=turma.id) }}" class="btn-lego btn-blue" style="flex: 1; justify-content: center;">
             <span>📋</span> Fazer Chamada
           </a>
@@ -127,61 +143,62 @@
             <span>📝</span> Diário
           </a>
         </div>
+
       </div>
     {% endfor %}
   </div>
 </div>
 
-<!-- Ranking Top 5 Alunos e Atividades Recentes -->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+<!-- Grid Inferior: Ranking e Desafios -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px;">
   
   <!-- Top 5 Alunos XP -->
   <div class="lego-card">
-    <div class="lego-card-header" style="background: #1E293B;">
-      <h3 style="font-size: 1.1rem; font-weight: 800; color: #F8FAFC;">
+    <div class="lego-card-header">
+      <h3 style="font-size: 1.05rem; font-weight: 800; color: #0F172A;">
         ⭐ Top Construtores em Destaque (XP)
       </h3>
-      <a href="{{ url_for('gamificacao') }}" class="btn-lego btn-yellow btn-sm">Ver Ranking Completo</a>
+      <a href="{{ url_for('gamificacao') }}" class="btn-lego btn-yellow btn-sm">Ver Placar Completo</a>
     </div>
     <div class="lego-card-body" style="padding: 0;">
-      <div style="display: flex; flex-direction: column;">
-        {% for a in top_alunos %}
-          {% set lvl = a.info_nivel %}
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #334155;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-weight: 900; font-size: 1rem; color: #94A3B8; width: 20px;">#{{ loop.index }}</span>
-              <div>
-                <div style="font-weight: 800; font-size: 0.9rem; color: #F8FAFC;">{{ a.nome }}</div>
-                <div style="font-size: 0.75rem; color: #94A3B8;">{{ a.turma.nome }} &bull; {{ a.equipe }}</div>
-              </div>
-            </div>
-            <div style="text-align: right;">
-              <div style="font-size: 1rem; font-weight: 900; color: #F59E0B;">{{ a.pontos_xp }} XP</div>
-              <div style="font-size: 0.72rem; color: #94A3B8;">{{ lvl['badge'] }} Nível {{ lvl['nivel'] }}</div>
+      {% for a in top_alunos %}
+        {% set lvl = a.info_nivel %}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #E2E8F0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-weight: 900; font-size: 1.1rem; color: #64748B; width: 24px;">#{{ loop.index }}</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.92rem; color: #0F172A;">{{ a.nome }}</div>
+              <div style="font-size: 0.76rem; color: #64748B;">{{ a.turma.nome }} &bull; {{ a.equipe }}</div>
             </div>
           </div>
-        {% endfor %}
-      </div>
+          <div style="text-align: right;">
+            <div style="font-size: 1.05rem; font-weight: 900; color: #D97706;">{{ a.pontos_xp }} XP</div>
+            <div style="font-size: 0.74rem; color: #64748B; font-weight: 600;">{{ lvl['badge'] }} Nível {{ lvl['nivel'] }}</div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
   </div>
 
   <!-- Desafios Ativos -->
   <div class="lego-card">
-    <div class="lego-card-header" style="background: #1E293B;">
-      <h3 style="font-size: 1.1rem; font-weight: 800; color: #F8FAFC;">
+    <div class="lego-card-header">
+      <h3 style="font-size: 1.05rem; font-weight: 800; color: #0F172A;">
         🎯 Desafios de Robótica Ativos
       </h3>
-      <a href="{{ url_for('atividades_page') }}" class="btn-lego btn-blue btn-sm">Gerenciar</a>
+      <a href="{{ url_for('atividades_page') }}" class="btn-lego btn-blue btn-sm">Gerenciar Desafios</a>
     </div>
-    <div class="lego-card-body" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+    <div class="lego-card-body" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
       {% for ativ in atividades_recentes %}
-        <div style="background: #0F172A; padding: 12px; border-radius: 8px; border: 1px solid #334155;">
+        <div style="background: #F8FAFC; padding: 14px; border-radius: 10px; border: 1px solid #E2E8F0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <h4 style="font-size: 0.95rem; font-weight: 800; color: #F8FAFC;">{{ ativ.titulo }}</h4>
-            <span style="font-size: 0.8rem; font-weight: 800; color: #F59E0B;">⭐ +{{ ativ.xp_recompensa }} XP</span>
+            <h4 style="font-size: 0.95rem; font-weight: 800; color: #0F172A;">{{ ativ.titulo }}</h4>
+            <span style="font-size: 0.8rem; font-weight: 800; color: #D97706; background: #FFFBEB; padding: 2px 8px; border-radius: 6px;">
+              ⭐ +{{ ativ.xp_recompensa }} XP
+            </span>
           </div>
-          <p style="font-size: 0.8rem; color: #94A3B8; margin-bottom: 6px;">{{ ativ.descricao[:90] }}...</p>
-          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #CBD5E1;">
+          <p style="font-size: 0.82rem; color: #64748B; margin-bottom: 8px;">{{ ativ.descricao[:110] }}...</p>
+          <div style="display: flex; justify-content: space-between; font-size: 0.76rem; color: #334155; font-weight: 600;">
             <span>🤖 {{ ativ.kit_lego }}</span>
             <span>📅 Prazo: {{ ativ.data_limite.strftime('%d/%m/%Y') if ativ.data_limite else 'Sem prazo' }}</span>
           </div>
